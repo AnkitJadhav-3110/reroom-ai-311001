@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 30 25% 98%;
+    --foreground: 155 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 155 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 155 30% 15%;
+
+    --primary: 155 50% 20%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 30 20% 95%;
+    --secondary-foreground: 155 30% 15%;
+
+    --muted: 30 20% 96%;
+    --muted-foreground: 155 10% 45%;
+
+    --accent: 155 45% 25%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 155 15% 88%;
+    --input: 155 15% 90%;
+    --ring: 155 50% 20%;
+
+    --radius: 0.5rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(155 50% 20%), hsl(155 45% 30%));
+    --gradient-hero: linear-gradient(180deg, hsl(30 25% 98%), hsl(155 30% 96%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(30 20% 98%));
+    --shadow-elegant: 0 10px 40px -15px hsl(155 50% 20% / 0.25);
+    --shadow-glow: 0 0 60px hsl(155 45% 30% / 0.12);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 155 25% 10%;
+    --foreground: 30 20% 95%;
+
+    --card: 155 20% 13%;
+    --card-foreground: 30 20% 95%;
+
+    --popover: 155 20% 13%;
+    --popover-foreground: 30 20% 95%;
+
+    --primary: 155 45% 45%;
+    --primary-foreground: 155 25% 10%;
+
+    --secondary: 155 15% 18%;
+    --secondary-foreground: 30 20% 95%;
+
+    --muted: 155 15% 20%;
+    --muted-foreground: 155 10% 60%;
+
+    --accent: 155 40% 50%;
+    --accent-foreground: 155 25% 10%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 30 20% 95%;
+
+    --border: 155 15% 22%;
+    --input: 155 15% 22%;
+    --ring: 155 45% 45%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(155 45% 35%), hsl(155 40% 45%));
+    --gradient-hero: linear-gradient(180deg, hsl(155 25% 10%), hsl(155 20% 13%));
+    --gradient-subtle: linear-gradient(180deg, hsl(155 25% 10%), hsl(155 20% 15%));
+    --shadow-elegant: 0 10px 40px -15px hsl(155 45% 45% / 0.3);
+    --shadow-glow: 0 0 60px hsl(155 40% 45% / 0.2);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+  }
+
+  /* Fix touch target size for Lovable badge close button */
+  #lovable-badge-close {
+    min-width: 24px !important;
+    min-height: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+}
