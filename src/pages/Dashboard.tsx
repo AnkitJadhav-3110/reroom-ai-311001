@@ -11,6 +11,7 @@ import CreditDisplay from "@/components/dashboard/CreditDisplay";
 import FeedbackForm from "@/components/dashboard/FeedbackForm";
 import LowCreditsBanner from "@/components/dashboard/LowCreditsBanner";
 import PremiumFooter from "@/components/PremiumFooter";
+import AIAssistantChat from "@/components/dashboard/AIAssistantChat";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -116,6 +117,7 @@ const Dashboard = () => {
       </main>
 
       <PremiumFooter />
+      <AIAssistantChat />
     </div>
   );
 };

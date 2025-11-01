@@ -14,13 +14,191 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          design_id: string | null
+          id: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          design_id?: string | null
+          id?: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          design_id?: string | null
+          id?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "generated_designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "public_shared_designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generated_designs: {
+        Row: {
+          created_at: string
+          custom_prompt: string | null
+          generated_image_url: string
+          id: string
+          is_favorite: boolean | null
+          original_image_url: string
+          public_share_id: string | null
+          theme: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_prompt?: string | null
+          generated_image_url: string
+          id?: string
+          is_favorite?: boolean | null
+          original_image_url: string
+          public_share_id?: string | null
+          theme: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_prompt?: string | null
+          generated_image_url?: string
+          id?: string
+          is_favorite?: boolean | null
+          original_image_url?: string
+          public_share_id?: string | null
+          theme?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          credits: number
+          email: string
+          full_name: string | null
+          id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          credits?: number
+          email: string
+          full_name?: string | null
+          id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          credits?: number
+          email?: string
+          full_name?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      public_shared_designs: {
+        Row: {
+          created_at: string | null
+          custom_prompt: string | null
+          generated_image_url: string | null
+          id: string | null
+          is_favorite: boolean | null
+          original_image_url: string | null
+          public_share_id: string | null
+          theme: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_prompt?: string | null
+          generated_image_url?: string | null
+          id?: string | null
+          is_favorite?: boolean | null
+          original_image_url?: string | null
+          public_share_id?: string | null
+          theme?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_prompt?: string | null
+          generated_image_url?: string | null
+          id?: string | null
+          is_favorite?: boolean | null
+          original_image_url?: string | null
+          public_share_id?: string | null
+          theme?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_user_credits: { Args: { p_user_id: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
