@@ -8,55 +8,60 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Luxury-Tech Hybrid Palette - Warm Whites with Dark Forest Green */
-    --background: 35 15% 97%;
-    --foreground: 155 45% 20%;
+    /* Calm Luxury × AI Precision Palette */
+    --background: 35 8% 98%; /* Warm White #FAFAF7 */
+    --foreground: 155 45% 18%; /* Deep Forest Green variant */
     --card: 0 0% 100%;
-    --card-foreground: 155 45% 20%;
+    --card-foreground: 155 45% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 155 45% 20%;
+    --popover-foreground: 155 45% 18%;
     
-    /* Primary: Dark Forest Green */
-    --primary: 155 45% 28%;
+    /* Primary: Deep Forest Green #1E3B32 */
+    --primary: 155 35% 18%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 155 50% 38%;
-    --primary-variant: 150 40% 32%;
+    --primary-glow: 155 40% 28%;
+    --primary-variant: 150 35% 22%;
     
-    /* Secondary: Warm Neutral */
-    --secondary: 30 12% 92%;
-    --secondary-foreground: 155 45% 20%;
-    --secondary-glow: 35 18% 88%;
+    /* Accent: Champagne Gold #C8B88A */
+    --accent: 40 35% 67%;
+    --accent-foreground: 155 35% 18%;
+    --accent-glow: 40 40% 75%;
     
-    /* Accent: Rich Forest Green */
-    --accent: 160 48% 32%;
-    --accent-foreground: 0 0% 100%;
+    /* Secondary: Stone Grey #E9E6E1 */
+    --secondary: 35 12% 90%;
+    --secondary-foreground: 155 35% 18%;
+    --secondary-glow: 35 15% 88%;
     
-    --muted: 35 10% 94%;
-    --muted-foreground: 155 15% 45%;
+    --muted: 35 10% 92%;
+    --muted-foreground: 155 10% 45%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
     --border: 35 12% 88%;
-    --input: 35 10% 96%;
-    --ring: 155 45% 28%;
-    --radius: 1.25rem;
+    --input: 35 8% 96%;
+    --ring: 155 35% 18%;
+    --radius: 1.5rem; /* 24px base radius */
     
     /* Luxury Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(35 20% 98%) 0%, hsl(35 15% 96%) 50%, hsl(40 18% 97%) 100%);
+    --gradient-hero: radial-gradient(ellipse at top, hsl(155 35% 18% / 0.15), transparent 50%), linear-gradient(135deg, hsl(35 8% 98%) 0%, hsl(40 35% 67% / 0.1) 100%);
+    --gradient-spotlight: radial-gradient(circle at center, hsl(40 35% 67% / 0.2), transparent 70%);
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(35 12% 98%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(155 45% 28%), hsl(160 48% 32%));
-    --gradient-accent: linear-gradient(135deg, hsl(150 40% 32%), hsl(155 50% 38%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(35 10% 98%));
-    --gradient-glow: radial-gradient(circle at center, hsl(155 40% 60% / 0.12), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(155 35% 18%), hsl(150 35% 22%));
+    --gradient-accent: linear-gradient(135deg, hsl(40 35% 67%), hsl(40 40% 75%));
+    --gradient-cta: linear-gradient(135deg, hsl(155 35% 18%) 0%, hsl(155 40% 28%) 50%, hsl(40 35% 67% / 0.3) 100%);
+    --gradient-footer: linear-gradient(180deg, hsl(155 35% 18%), hsl(155 35% 15%));
     
-    /* Elegant Shadows - Subtle & Premium */
+    /* Elegant Shadows - Micro-shadows & Gold Glows */
+    --shadow-micro: 0 2px 8px -2px hsl(155 20% 20% / 0.06);
     --shadow-elegant: 0 8px 32px -8px hsl(155 30% 30% / 0.08);
     --shadow-glow: 0 0 48px hsl(155 40% 40% / 0.15);
-    --shadow-card: 0 2px 16px -2px hsl(155 20% 40% / 0.06);
+    --shadow-gold: 0 0 32px hsl(40 35% 67% / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(155 20% 40% / 0.08);
     --shadow-float: 0 16px 48px -12px hsl(155 30% 35% / 0.12);
     
     /* Animation & Transitions */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-glow: box-shadow 0.3s ease, transform 0.3s ease;
   }
 
   .dark {
@@ -73,13 +78,16 @@ All colors MUST be HSL.
     --primary-glow: 155 55% 55%;
     --primary-variant: 160 48% 50%;
     
+    /* Accent: Champagne Gold for dark mode */
+    --accent: 40 40% 72%;
+    --accent-foreground: 155 20% 12%;
+    --accent-glow: 40 45% 80%;
+    
     /* Secondary: Dark Warm Neutral */
     --secondary: 155 12% 22%;
     --secondary-foreground: 35 10% 95%;
     --secondary-glow: 155 15% 28%;
     
-    --accent: 160 50% 50%;
-    --accent-foreground: 155 20% 12%;
     --muted: 155 10% 18%;
     --muted-foreground: 35 8% 65%;
     --destructive: 0 75% 55%;
@@ -89,16 +97,19 @@ All colors MUST be HSL.
     --ring: 155 50% 48%;
     
     /* Dark Mode Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(155 18% 14%) 0%, hsl(155 20% 16%) 50%, hsl(160 18% 15%) 100%);
+    --gradient-hero: radial-gradient(ellipse at top, hsl(155 50% 48% / 0.15), transparent 50%), linear-gradient(135deg, hsl(155 18% 14%) 0%, hsl(40 40% 72% / 0.1) 100%);
+    --gradient-spotlight: radial-gradient(circle at center, hsl(40 40% 72% / 0.2), transparent 70%);
     --gradient-card: linear-gradient(135deg, hsl(155 16% 16%) 0%, hsl(155 18% 18%) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(155 50% 48%), hsl(160 48% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(150 45% 45%), hsl(155 52% 52%));
-    --gradient-subtle: linear-gradient(180deg, hsl(155 18% 14%), hsl(155 15% 12%));
-    --gradient-glow: radial-gradient(circle at center, hsl(155 45% 40% / 0.25), transparent 70%);
+    --gradient-accent: linear-gradient(135deg, hsl(40 40% 72%), hsl(40 45% 80%));
+    --gradient-cta: linear-gradient(135deg, hsl(155 50% 48%) 0%, hsl(155 55% 55%) 50%, hsl(40 40% 72% / 0.3) 100%);
+    --gradient-footer: linear-gradient(180deg, hsl(155 18% 14%), hsl(155 15% 12%));
     
+    --shadow-micro: 0 2px 8px -2px hsl(155 40% 20% / 0.2);
     --shadow-elegant: 0 8px 32px -8px hsl(155 40% 20% / 0.4);
     --shadow-glow: 0 0 48px hsl(155 50% 35% / 0.35);
-    --shadow-card: 0 2px 16px -2px hsl(155 30% 15% / 0.3);
+    --shadow-gold: 0 0 32px hsl(40 40% 72% / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(155 30% 15% / 0.3);
     --shadow-float: 0 16px 48px -12px hsl(155 40% 25% / 0.4);
   }
 }
@@ -109,13 +120,81 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-weight: 600;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .font-subheading {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-weight: 500;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes parallaxFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes scanLine {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes goldGlow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(var(--accent) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(var(--accent) / 0.6);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .animate-parallax-float {
+    animation: parallaxFloat 6s ease-in-out infinite;
+  }
+
+  .animate-scan {
+    animation: scanLine 2s ease-in-out;
+  }
+
+  .animate-gold-glow {
+    animation: goldGlow 2s ease-in-out infinite;
   }
 
   /* Fix touch target size for Lovable badge close button */
