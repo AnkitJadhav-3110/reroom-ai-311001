@@ -2,6 +2,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { checkRateLimit } from '../_shared/rateLimiter.ts';
+import { ErrorCodes, createErrorResponse } from '../_shared/errorCodes.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +11,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  const correlationId = crypto.randomUUID();
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -18,7 +22,7 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
+        JSON.stringify(createErrorResponse(ErrorCodes.AUTH_MISSING, correlationId)),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -40,14 +44,36 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      console.error('Authentication error:', authError);
+      console.error(`[${correlationId}] Auth failed`);
       return new Response(
-        JSON.stringify({ error: 'Invalid or expired token' }),
+        JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Authenticated user:', user.id);
+    console.log(`[${correlationId}] Processing generation for user ${user.id}`);
+
+    // Rate limiting: 10 generations per hour
+    const rateLimit = checkRateLimit(user.id, 'generate-room-design', {
+      maxRequests: 10,
+      windowMs: 60 * 60 * 1000
+    });
+
+    if (!rateLimit.allowed) {
+      console.warn(`[${correlationId}] Rate limit exceeded for user ${user.id}`);
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(rateLimit.resetTime).toISOString()
+          } 
+        }
+      );
+    }
 
     const requestBody = await req.json();
     
@@ -61,9 +87,9 @@ serve(async (req) => {
     const validationResult = inputSchema.safeParse(requestBody);
     
     if (!validationResult.success) {
-      console.error('Validation error:', validationResult.error);
+      console.error(`[${correlationId}] Validation failed`);
       return new Response(
-        JSON.stringify({ error: 'Invalid input parameters', details: validationResult.error.issues }),
+        JSON.stringify(createErrorResponse(ErrorCodes.VALIDATION_FAILED, correlationId)),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -72,7 +98,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+      console.error(`[${correlationId}] API key not configured`);
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.CONFIG_ERROR, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Check user credits server-side
@@ -83,21 +113,21 @@ serve(async (req) => {
       .single();
 
     if (profileError) {
-      console.error('Error fetching profile:', profileError);
+      console.error(`[${correlationId}] Profile fetch failed`);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch user profile' }),
+        JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!profile || profile.credits < 1) {
       return new Response(
-        JSON.stringify({ error: 'Insufficient credits' }),
+        JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
         { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`User has ${profile.credits} credits`);
+    console.log(`[${correlationId}] User has ${profile.credits} credits`);
 
     // Deduct credit BEFORE generation to prevent race conditions
     const { error: deductError } = await supabaseAdmin
@@ -106,19 +136,19 @@ serve(async (req) => {
       .eq('id', user.id);
 
     if (deductError) {
-      console.error('Error deducting credit:', deductError);
+      console.error(`[${correlationId}] Credit deduction failed`);
       return new Response(
-        JSON.stringify({ error: 'Failed to deduct credit' }),
+        JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Credit deducted successfully');
+    console.log(`[${correlationId}] Credit deducted`);
 
     // Create the prompt based on theme or custom prompt
     const designPrompt = customPrompt || `Redesign this room interior in ${theme} style. Transform the space while maintaining the room's structure and layout. Apply ${theme} design elements, colors, furniture, and decor. Make it look professional and realistic.`;
 
-    console.log('Generating design with prompt:', designPrompt);
+    console.log(`[${correlationId}] Generating design`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -150,24 +180,26 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
+      console.error(`[${correlationId}] AI gateway error: ${response.status}`);
       
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
+          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.', code: 'SVC_003', correlationId }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();
@@ -180,7 +212,11 @@ serve(async (req) => {
         .update({ credits: profile.credits })
         .eq('id', user.id);
       
-      throw new Error('No image generated');
+      console.error(`[${correlationId}] No image generated`);
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Record the transaction
@@ -193,19 +229,25 @@ serve(async (req) => {
         description: `Generated ${theme || 'custom'} design`
       });
 
-    console.log('Design generation successful');
+    console.log(`[${correlationId}] Generation successful`);
 
     return new Response(
       JSON.stringify({ 
         generatedImageUrl,
         creditsRemaining: profile.credits - 1
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-RateLimit-Remaining': rateLimit.remaining.toString()
+        } 
+      }
     );
   } catch (error) {
-    console.error('Error in generate-room-design:', error);
+    console.error(`[${correlationId}] Error:`, error instanceof Error ? error.message : 'Unknown');
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

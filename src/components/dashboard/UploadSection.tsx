@@ -96,10 +96,11 @@ const UploadSection = ({ credits, onCreditsUpdate, userId }: UploadSectionProps)
     setProgress(10);
     
     try {
-      // Upload original image to storage
+      // Upload original image to storage with UUID-based path
       setProgress(20);
       const fileExt = selectedImage.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      const imageId = crypto.randomUUID();
+      const fileName = `designs/${imageId}.${fileExt}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('room-images')

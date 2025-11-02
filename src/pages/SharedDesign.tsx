@@ -138,7 +138,7 @@ const SharedDesign = () => {
               </h2>
               {design.custom_prompt && (
                 <p className="text-muted-foreground mb-4">
-                  Custom Prompt: {design.custom_prompt}
+                  Custom Prompt: <span className="break-words">{design.custom_prompt}</span>
                 </p>
               )}
             </div>
