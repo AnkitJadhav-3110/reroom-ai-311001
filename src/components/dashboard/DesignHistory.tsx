@@ -110,55 +110,67 @@ const DesignHistory = ({ userId }: DesignHistoryProps) => {
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-muted-foreground">Loading designs...</div>;
+    return <div className="text-center py-16 text-forest-green/60 font-body animate-fadeInUp">Loading your designs...</div>;
   }
 
   if (designs.length === 0) {
     return (
-      <Card className="p-12 text-center">
-        <Image className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">No designs yet</h3>
-        <p className="text-muted-foreground">Upload a room photo to get started!</p>
+      <Card className="p-16 text-center bg-warm-white/80 backdrop-blur-sm border-champagne-gold/20 shadow-elegant rounded-3xl animate-fadeInUp">
+        <Image className="w-20 h-20 mx-auto text-champagne-gold/50 mb-6" />
+        <h3 className="text-2xl font-serif font-semibold text-forest-green mb-3">No designs yet</h3>
+        <p className="text-forest-green/70 font-body">Upload a room photo to begin your design journey!</p>
       </Card>
     );
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {designs.map((design) => (
-        <Card key={design.id} className="overflow-hidden">
-          <div className="grid grid-cols-2 gap-2 p-4">
+      {designs.map((design, index) => (
+        <Card 
+          key={design.id} 
+          className="overflow-hidden bg-warm-white/80 backdrop-blur-sm border-champagne-gold/20 shadow-elegant rounded-3xl hover:shadow-glow transition-all duration-300 hover:scale-[1.02] animate-fadeInUp"
+          style={{ animationDelay: `${index * 0.1}s` }}
+        >
+          <div className="grid grid-cols-2 gap-3 p-5">
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">Original</p>
-              <img 
-                src={imageUrls[design.id] || ''} 
-                alt="Original room" 
-                className="w-full h-auto rounded-md border border-border"
-              />
+              <p className="text-xs text-forest-green/60 font-body font-medium">Original</p>
+              <div className="rounded-2xl overflow-hidden border-2 border-champagne-gold/20">
+                <img 
+                  src={imageUrls[design.id] || ''} 
+                  alt="Original room" 
+                  className="w-full h-auto"
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">Generated</p>
-              <img 
-                src={design.generated_image_url} 
-                alt="Generated design" 
-                className="w-full h-auto rounded-md border border-border"
-              />
+              <p className="text-xs text-forest-green/60 font-body font-medium">Generated</p>
+              <div className="rounded-2xl overflow-hidden border-2 border-champagne-gold">
+                <img 
+                  src={design.generated_image_url} 
+                  alt="Generated design" 
+                  className="w-full h-auto"
+                />
+              </div>
             </div>
           </div>
-          <div className="px-4 pb-4 space-y-3">
+          <div className="px-5 pb-5 space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">
-                {new Date(design.created_at).toLocaleDateString()}
+              <p className="text-xs text-forest-green/60 font-body">
+                {new Date(design.created_at).toLocaleDateString('en-US', { 
+                  month: 'long', 
+                  day: 'numeric', 
+                  year: 'numeric' 
+                })}
               </p>
-              <p className="text-sm font-medium text-foreground mt-1">
-                {design.theme || design.custom_prompt || "Custom Design"}
+              <p className="text-sm font-subheading font-semibold text-forest-green mt-2">
+                {design.theme ? `${design.theme.charAt(0).toUpperCase() + design.theme.slice(1)} Style` : design.custom_prompt || "Custom Design"}
               </p>
             </div>
             <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-champagne-gold/30 text-forest-green hover:bg-stone/20 rounded-2xl font-subheading"
                 onClick={() => handleDownload(design.generated_image_url, design.id)}
               >
                 <Download className="w-3 h-3 mr-1" />
@@ -167,7 +179,7 @@ const DesignHistory = ({ userId }: DesignHistoryProps) => {
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-champagne-gold/30 text-forest-green hover:bg-stone/20 rounded-2xl font-subheading"
                 onClick={() => handleShare(design.id)}
               >
                 <Share2 className="w-3 h-3 mr-1" />

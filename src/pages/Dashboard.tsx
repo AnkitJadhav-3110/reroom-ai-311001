@@ -67,23 +67,23 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)]">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary" />
+    <div className="min-h-screen bg-warm-white">
+      <header className="border-b border-stone/20 bg-warm-white/95 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+        <div className="container mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-forest-green/10 flex items-center justify-center shadow-elegant">
+              <Sparkles className="w-6 h-6 text-forest-green" />
             </div>
             <div>
-              <h1 className="text-xl font-serif font-semibold text-foreground">ReRoom AI</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Design Without Limits</p>
+              <h1 className="text-2xl font-serif font-bold text-forest-green tracking-tight">ReRoom AI</h1>
+              <p className="text-xs text-forest-green/60 font-body tracking-wide hidden sm:block">Design Without Limits</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <FeedbackForm userId={userId} />
             <CreditDisplay credits={credits} />
-            <Button variant="outline" onClick={handleSignOut}>
+            <Button variant="luxury" onClick={handleSignOut} className="shadow-sm">
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
             </Button>
@@ -91,16 +91,22 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-12">
         <LowCreditsBanner credits={credits} />
         
-        <Tabs defaultValue="upload" className="space-y-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-            <TabsTrigger value="upload" className="flex items-center gap-2">
+        <Tabs defaultValue="upload" className="space-y-8">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-stone/30 p-1.5 rounded-3xl border border-champagne-gold/20">
+            <TabsTrigger 
+              value="upload" 
+              className="flex items-center gap-2 rounded-3xl font-subheading data-[state=active]:bg-warm-white data-[state=active]:text-forest-green data-[state=active]:shadow-elegant transition-all duration-300"
+            >
               <Upload className="w-4 h-4" />
               Create Design
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="history" 
+              className="flex items-center gap-2 rounded-3xl font-subheading data-[state=active]:bg-warm-white data-[state=active]:text-forest-green data-[state=active]:shadow-elegant transition-all duration-300"
+            >
               <History className="w-4 h-4" />
               My Designs
             </TabsTrigger>

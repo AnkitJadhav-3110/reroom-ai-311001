@@ -207,7 +207,7 @@ const UploadSection = ({ credits, onCreditsUpdate, userId }: UploadSectionProps)
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-8 animate-fadeInUp">
       <AddCreditsModal
         open={showCreditsModal}
         onClose={() => setShowCreditsModal(false)}
@@ -218,25 +218,29 @@ const UploadSection = ({ credits, onCreditsUpdate, userId }: UploadSectionProps)
         userId={userId}
       />
 
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Upload Your Room</h2>
+      <Card className="p-10 bg-warm-white/80 backdrop-blur-sm border-champagne-gold/20 shadow-elegant rounded-3xl">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-serif font-bold text-forest-green mb-3 tracking-tight">Your Space, Reimagined Instantly</h2>
+          <p className="text-forest-green/70 font-body tracking-wide">Upload, customize, and watch AI design intelligence unfold</p>
+        </div>
         
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div>
-            <Label htmlFor="room-image">Room Photo</Label>
+            <Label htmlFor="room-image" className="text-base font-subheading text-forest-green mb-3 block">Select Your Room Photo</Label>
             <div className="mt-2">
               <Input
                 id="room-image"
                 type="file"
                 accept="image/*"
                 onChange={handleImageSelect}
-                className="cursor-pointer"
+                className="cursor-pointer border-champagne-gold/30 rounded-2xl h-14 file:mr-4 file:py-2 file:px-6 file:rounded-xl file:border-0 file:bg-forest-green file:text-warm-white file:font-subheading hover:file:bg-forest-green/90 transition-all"
               />
             </div>
+            <p className="text-sm text-forest-green/60 mt-2 font-body">Supported: JPEG, PNG, WebP • Max 10MB • Up to 4096x4096px</p>
           </div>
 
           {previewUrl && (
-            <div className="rounded-lg overflow-hidden border border-border">
+            <div className="rounded-3xl overflow-hidden border-2 border-champagne-gold/20 shadow-elegant animate-fadeInUp">
               <img src={previewUrl} alt="Room preview" className="w-full h-auto" />
             </div>
           )}
@@ -244,43 +248,50 @@ const UploadSection = ({ credits, onCreditsUpdate, userId }: UploadSectionProps)
           <ThemeSelector selectedTheme={selectedTheme} onThemeSelect={setSelectedTheme} />
 
           <div>
-            <Label htmlFor="custom-prompt">Or Enter Custom Prompt</Label>
+            <Label htmlFor="custom-prompt" className="text-base font-subheading text-forest-green mb-3 block">Or Describe Your Vision</Label>
             <Textarea
               id="custom-prompt"
-              placeholder="Describe your dream interior design style..."
+              placeholder="e.g., A serene Scandinavian bedroom with natural wood and soft textures..."
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
-              className="mt-2 min-h-24"
+              className="mt-2 min-h-32 border-champagne-gold/30 rounded-2xl font-body resize-none focus:border-champagne-gold focus:ring-champagne-gold"
             />
+            <p className="text-sm text-forest-green/60 mt-2 font-body">Maximum 500 characters</p>
           </div>
 
           {generating && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Generating your design...</span>
+            <div className="space-y-4 p-6 bg-stone/20 rounded-2xl border border-champagne-gold/10 animate-fadeInUp">
+              <div className="flex items-center gap-3 text-forest-green font-subheading">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="animate-scanLine">Analyzing space and generating design...</span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-3 bg-stone/30" />
+              <p className="text-sm text-forest-green/70 font-body text-center">This may take 30-60 seconds</p>
             </div>
           )}
 
           <Button
             onClick={handleGenerate}
             disabled={generating}
-            className="w-full"
+            variant="luxury"
+            className="w-full h-14 text-lg shadow-glow"
             size="lg"
           >
             <Wand2 className="w-5 h-5 mr-2" />
-            {generating ? "Generating..." : "Generate Design (1 Credit)"}
+            {generating ? "Generating Your Design..." : "Generate Design (1 Credit)"}
           </Button>
+          
+          <p className="text-center text-sm text-forest-green/60 font-body">
+            ⭐ 4 Free Credits Included — No Card Required
+          </p>
         </div>
       </Card>
 
       {generatedResult && (
         <>
           <GeneratedDesignResult {...generatedResult} />
-          <div className="flex justify-center">
-            <Button onClick={handleNewDesign} variant="outline" size="lg">
+          <div className="flex justify-center animate-fadeInUp">
+            <Button onClick={handleNewDesign} variant="outline" size="lg" className="border-champagne-gold/30 text-forest-green hover:bg-stone/20 rounded-3xl h-12 px-8 font-subheading">
               Create Another Design
             </Button>
           </div>

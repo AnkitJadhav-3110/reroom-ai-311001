@@ -20,18 +20,22 @@ interface ThemeSelectorProps {
 const ThemeSelector = ({ selectedTheme, onThemeSelect }: ThemeSelectorProps) => {
   return (
     <div>
-      <Label className="text-base font-semibold">Choose Design Theme</Label>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+      <Label className="text-base font-subheading text-forest-green mb-3 block">Choose Your Design Mood</Label>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
         {themes.map((theme) => (
           <Button
             key={theme.id}
-            variant={selectedTheme === theme.id ? "default" : "outline"}
+            variant={selectedTheme === theme.id ? "luxury" : "outline"}
             onClick={() => onThemeSelect(theme.id)}
-            className="h-auto flex flex-col items-center gap-2 py-5 transition-all hover:scale-105"
+            className={`h-auto flex flex-col items-center gap-2 py-6 rounded-2xl transition-all hover:scale-105 border-champagne-gold/30 ${
+              selectedTheme === theme.id 
+                ? 'shadow-glow border-champagne-gold' 
+                : 'hover:border-champagne-gold/60 hover:bg-stone/10'
+            }`}
           >
-            <span className="text-3xl">{theme.emoji}</span>
-            <span className="text-sm font-semibold">{theme.name}</span>
-            <span className="text-xs text-muted-foreground opacity-75">{theme.description}</span>
+            <span className="text-4xl">{theme.emoji}</span>
+            <span className="text-sm font-subheading">{theme.name}</span>
+            <span className="text-xs opacity-75 font-body">{theme.description}</span>
           </Button>
         ))}
       </div>

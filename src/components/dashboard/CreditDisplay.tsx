@@ -7,11 +7,11 @@ interface CreditDisplayProps {
 
 const CreditDisplay = ({ credits }: CreditDisplayProps) => {
   return (
-    <Card className="px-4 py-2 flex items-center gap-2 border-primary/20 bg-primary/5">
-      <Coins className="w-5 h-5 text-primary" />
+    <Card className="px-5 py-2.5 flex items-center gap-3 border-champagne-gold/30 bg-champagne-gold/10 shadow-sm rounded-2xl">
+      <Coins className="w-5 h-5 text-champagne-gold" />
       <div>
-        <p className="text-sm font-medium text-foreground">{credits}</p>
-        <p className="text-xs text-muted-foreground">Credits</p>
+        <p className="text-base font-subheading font-semibold text-forest-green">{credits}</p>
+        <p className="text-xs text-forest-green/60 font-body">Credits</p>
       </div>
     </Card>
   );
