@@ -32,14 +32,14 @@ const PremiumFooter = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/auth" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
-                  Get Started
+                <Link to="/marketplace" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
+                  Theme Marketplace
                 </Link>
               </li>
               <li>
-                <a href="#features" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
-                  Features
-                </a>
+                <Link to="/auth" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
+                  Get Started
+                </Link>
               </li>
             </ul>
           </div>
@@ -49,18 +49,18 @@ const PremiumFooter = () => {
             <h4 className="font-semibold text-accent border-b border-accent/30 pb-2">Company</h4>
             <ul className="space-y-2">
               <li>
+                <Link to="/blog" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link to="/affiliate" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
+                  Affiliate Program
+                </Link>
+              </li>
+              <li>
                 <a href="#about" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
                   About Us
-                </a>
-              </li>
-              <li>
-                <a href="#blog" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#partners" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors font-subheading">
-                  Partners
                 </a>
               </li>
             </ul>
