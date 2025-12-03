@@ -8,7 +8,12 @@ import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import SharedDesign from "./pages/SharedDesign";
+import Subscription from "./pages/Subscription";
+import Marketplace from "./pages/Marketplace";
+import Affiliate from "./pages/Affiliate";
+import Blog from "./pages/Blog";
 import NotFound from "./pages/NotFound";
+import NewsletterPopup from "./components/NewsletterPopup";
 
 const queryClient = new QueryClient();
 
@@ -24,9 +29,14 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/shared/:shareId" element={<SharedDesign />} />
+          <Route path="/subscription" element={<Subscription />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/affiliate" element={<Affiliate />} />
+          <Route path="/blog" element={<Blog />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <NewsletterPopup />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

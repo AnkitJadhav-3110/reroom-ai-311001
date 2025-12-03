@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Sparkles, Upload, History } from "lucide-react";
+import { LogOut, Sparkles, Upload, History, Store, Settings } from "lucide-react";
 import { toast } from "sonner";
 import UploadSection from "@/components/dashboard/UploadSection";
 import DesignHistory from "@/components/dashboard/DesignHistory";
@@ -80,12 +80,29 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate("/marketplace")}
+              className="hidden md:flex"
+            >
+              <Store className="w-4 h-4 mr-2" />
+              Marketplace
+            </Button>
             <FeedbackForm userId={userId} />
             <CreditDisplay credits={credits} />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/subscription")}
+              className="hidden md:flex"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
             <Button variant="luxury" onClick={handleSignOut} className="shadow-sm">
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
         </div>
