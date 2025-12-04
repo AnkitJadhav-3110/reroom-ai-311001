@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const PremiumFooter = () => {
   return (
-    <footer className="bg-[var(--gradient-footer)] text-primary-foreground border-t border-accent/20">
+    <footer className="bg-primary text-primary-foreground border-t-2 border-accent/20">
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand Section */}

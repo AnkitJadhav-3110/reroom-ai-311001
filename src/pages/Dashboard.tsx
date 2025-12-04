@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Sparkles, Upload, History, Store, Settings } from "lucide-react";
+import { LogOut, Sparkles, Upload, History, Store, Settings, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import UploadSection from "@/components/dashboard/UploadSection";
 import DesignHistory from "@/components/dashboard/DesignHistory";
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [credits, setCredits] = useState(0);
   const [userId, setUserId] = useState<string>("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -34,6 +35,7 @@ const Dashboard = () => {
     const currentUserId = sessionData.data.session.user.id;
     setUserId(currentUserId);
     await fetchCredits(currentUserId);
+    await checkAdminRole(currentUserId);
     setLoading(false);
   };
 
@@ -52,6 +54,17 @@ const Dashboard = () => {
     setCredits(data?.credits || 0);
   };
 
+  const checkAdminRole = async (uid: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", uid)
+      .eq("role", "admin")
+      .maybeSingle();
+    
+    setIsAdmin(!!data);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -67,16 +80,16 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-warm-white">
-      <header className="border-b border-stone/20 bg-warm-white/95 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+    <div className="min-h-screen bg-background">
+      <header className="border-b-2 border-primary/10 bg-background/95 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
         <div className="container mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-forest-green/10 flex items-center justify-center shadow-elegant">
-              <Sparkles className="w-6 h-6 text-forest-green" />
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-card">
+              <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-serif font-bold text-forest-green tracking-tight">ReRoom AI</h1>
-              <p className="text-xs text-forest-green/60 font-body tracking-wide hidden sm:block">Design Without Limits</p>
+              <h1 className="text-2xl font-serif font-bold text-foreground tracking-tight">ReRoom AI</h1>
+              <p className="text-xs text-muted-foreground font-body tracking-wide hidden sm:block">Design Without Limits</p>
             </div>
           </div>
 
@@ -85,22 +98,36 @@ const Dashboard = () => {
               variant="ghost" 
               size="sm" 
               onClick={() => navigate("/marketplace")}
-              className="hidden md:flex"
+              className="hidden md:flex text-foreground hover:bg-primary/10 rounded-xl"
             >
               <Store className="w-4 h-4 mr-2" />
               Marketplace
             </Button>
+            {isAdmin && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate("/analytics")}
+                className="hidden md:flex text-foreground hover:bg-primary/10 rounded-xl"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
+            )}
             <FeedbackForm userId={userId} />
             <CreditDisplay credits={credits} />
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => navigate("/subscription")}
-              className="hidden md:flex"
+              className="hidden md:flex text-foreground hover:bg-primary/10 rounded-xl"
             >
               <Settings className="w-4 h-4" />
             </Button>
-            <Button variant="luxury" onClick={handleSignOut} className="shadow-sm">
+            <Button 
+              onClick={handleSignOut} 
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-card"
+            >
               <LogOut className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Sign Out</span>
             </Button>
@@ -112,17 +139,17 @@ const Dashboard = () => {
         <LowCreditsBanner credits={credits} />
         
         <Tabs defaultValue="upload" className="space-y-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-stone/30 p-1.5 rounded-3xl border border-champagne-gold/20">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-secondary/50 p-2 rounded-2xl border-2 border-primary/10">
             <TabsTrigger 
               value="upload" 
-              className="flex items-center gap-2 rounded-3xl font-subheading data-[state=active]:bg-warm-white data-[state=active]:text-forest-green data-[state=active]:shadow-elegant transition-all duration-300"
+              className="flex items-center gap-2 rounded-xl font-subheading data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-card transition-all duration-300"
             >
               <Upload className="w-4 h-4" />
               Create Design
             </TabsTrigger>
             <TabsTrigger 
               value="history" 
-              className="flex items-center gap-2 rounded-3xl font-subheading data-[state=active]:bg-warm-white data-[state=active]:text-forest-green data-[state=active]:shadow-elegant transition-all duration-300"
+              className="flex items-center gap-2 rounded-xl font-subheading data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-card transition-all duration-300"
             >
               <History className="w-4 h-4" />
               My Designs
