@@ -11,14 +11,18 @@ const Auth = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        // Handle referral attribution after signup
+        handleReferralAttribution(session.user.id);
         navigate("/dashboard");
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
+        // Handle referral on any sign in
+        await handleReferralAttribution(session.user.id);
         navigate("/dashboard");
       }
     });
@@ -26,19 +30,57 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const handleReferralAttribution = async (userId: string) => {
+    const referralCode = localStorage.getItem('referral_code');
+    if (!referralCode) return;
+
+    try {
+      // Find affiliate by code
+      const { data: affiliate } = await supabase
+        .from('affiliate_profiles')
+        .select('id')
+        .eq('affiliate_code', referralCode)
+        .eq('is_approved', true)
+        .maybeSingle();
+
+      if (affiliate) {
+        // Check if referral already exists
+        const { data: existingReferral } = await supabase
+          .from('referrals')
+          .select('id')
+          .eq('referred_user_id', userId)
+          .maybeSingle();
+
+        if (!existingReferral) {
+          // Create referral record
+          await supabase.from('referrals').insert({
+            affiliate_id: affiliate.id,
+            referred_user_id: userId,
+            status: 'pending'
+          });
+        }
+      }
+
+      // Clear the referral code from localStorage
+      localStorage.removeItem('referral_code');
+    } catch (error) {
+      console.error('Error processing referral:', error);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-warm-white p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-10 animate-fadeInUp">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-forest-green/10 mb-6 shadow-elegant">
-            <Sparkles className="w-10 h-10 text-forest-green animate-parallaxFloat" />
+        <div className="text-center mb-10 animate-fade-in-up">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-6 shadow-elegant">
+            <Sparkles className="w-10 h-10 text-primary animate-parallax-float" />
           </div>
-          <h1 className="text-4xl font-serif font-bold text-forest-green mb-3 tracking-tight">ReRoom AI</h1>
-          <p className="text-forest-green/70 font-body tracking-wide">Design Without Limits</p>
-          <p className="text-sm text-forest-green/60 mt-2 font-body">Welcome to your digital atelier</p>
+          <h1 className="text-4xl font-serif font-bold text-foreground mb-3 tracking-tight">ReRoom AI</h1>
+          <p className="text-muted-foreground font-body tracking-wide">Design Without Limits</p>
+          <p className="text-sm text-muted-foreground/80 mt-2 font-body">Welcome to your digital atelier</p>
         </div>
 
-        <div className="bg-warm-white rounded-3xl shadow-elegant p-10 border border-champagne-gold/20 backdrop-blur-sm animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+        <div className="bg-card rounded-3xl shadow-elegant p-10 border-2 border-primary/10 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <SupabaseAuth
             supabaseClient={supabase}
             appearance={{
@@ -53,13 +95,16 @@ const Auth = () => {
                     defaultButtonBackgroundHover: '#2A4F42',
                     inputBackground: '#FAFAF7',
                     inputBorder: '#E9E6E1',
-                    inputBorderFocus: '#C8B88A',
+                    inputBorderFocus: '#1E3B32',
                     inputBorderHover: '#C8B88A',
+                    inputText: '#1E3B32',
+                    inputLabelText: '#1E3B32',
+                    inputPlaceholder: '#1E3B32',
                   },
                   radii: {
-                    borderRadiusButton: '1.5rem',
-                    buttonBorderRadius: '1.5rem',
-                    inputBorderRadius: '1rem',
+                    borderRadiusButton: '1rem',
+                    buttonBorderRadius: '1rem',
+                    inputBorderRadius: '0.75rem',
                   },
                   fonts: {
                     bodyFontFamily: 'Inter, sans-serif',
@@ -75,7 +120,7 @@ const Auth = () => {
           />
         </div>
         
-        <p className="text-center mt-6 text-sm text-forest-green/60 font-body">
+        <p className="text-center mt-6 text-sm text-primary/70 font-medium">
           ⭐ 4 Free Credits — No Card Required
         </p>
       </div>

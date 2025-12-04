@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, X, Minimize2, Maximize2 } from "lucide-react";
+import { Bot, Send, X, Minimize2, Maximize2, Sparkles, HelpCircle, Upload, Palette, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { streamAIChat } from "@/lib/aiChat";
 
@@ -12,13 +12,20 @@ interface Message {
   content: string;
 }
 
+const quickActions = [
+  { label: "How to upload?", icon: Upload, prompt: "How do I upload a room photo for transformation?" },
+  { label: "Theme guide", icon: Palette, prompt: "What design themes are available and which one should I choose?" },
+  { label: "Credit system", icon: CreditCard, prompt: "How do credits work and how many do I have?" },
+  { label: "Get help", icon: HelpCircle, prompt: "I need help getting started with ReRoom AI" },
+];
+
 const AIAssistantChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! 👋 I'm your ReRoom AI assistant. I can help you upload images, choose themes, and get the best design transformations. What would you like to know?",
+      content: "Hi! 👋 I'm your ReRoom AI assistant. I can help you transform any room with AI-powered design. Ask me about uploading images, choosing themes, or how credits work. What would you like to know?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -31,10 +38,11 @@ const AIAssistantChat = () => {
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (messageText?: string) => {
+    const text = messageText || input;
+    if (!text.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input };
+    const userMessage: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -44,7 +52,7 @@ const AIAssistantChat = () => {
       assistantContent += chunk;
       setMessages((prev) => {
         const last = prev[prev.length - 1];
-        if (last?.role === "assistant") {
+        if (last?.role === "assistant" && prev.length > 1) {
           return prev.map((m, i) =>
             i === prev.length - 1 ? { ...m, content: assistantContent } : m
           );
@@ -63,6 +71,14 @@ const AIAssistantChat = () => {
       console.error("Chat error:", error);
       toast.error(error.message || "Failed to send message");
       setIsLoading(false);
+      // Add a fallback response
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "I apologize, but I'm having trouble connecting right now. Please try again in a moment, or check out the quick actions below for common questions!",
+        },
+      ]);
     }
   };
 
@@ -70,10 +86,10 @@ const AIAssistantChat = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-float bg-gradient-primary hover:shadow-glow transition-all duration-300 hover:scale-110 z-50"
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-float bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-300 hover:scale-110 z-50 border-2 border-accent/30"
         size="icon"
       >
-        <Bot className="w-6 h-6" />
+        <Bot className="w-7 h-7 text-primary-foreground" />
       </Button>
     );
   }
@@ -81,19 +97,19 @@ const AIAssistantChat = () => {
   return (
     <Card
       className={`fixed ${
-        isMinimized ? "bottom-6 right-6 w-80" : "bottom-6 right-6 w-96"
-      } shadow-float border-primary/20 bg-gradient-card backdrop-blur-xl z-50 transition-all duration-300`}
-      style={{ height: isMinimized ? "60px" : "500px" }}
+        isMinimized ? "bottom-6 right-6 w-80" : "bottom-6 right-6 w-[420px]"
+      } shadow-float border-2 border-primary/20 bg-background backdrop-blur-xl z-50 transition-all duration-300 rounded-3xl overflow-hidden`}
+      style={{ height: isMinimized ? "70px" : "550px" }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-subtle">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center animate-glow-pulse">
-            <Bot className="w-5 h-5 text-white" />
+      <div className="flex items-center justify-between p-4 border-b-2 border-primary/10 bg-primary/5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm">AI Assistant</h3>
-            <p className="text-xs text-muted-foreground">Always here to help</p>
+            <h3 className="font-semibold text-primary text-base">AI Design Assistant</h3>
+            <p className="text-xs text-primary/60">Here to help you design</p>
           </div>
         </div>
         <div className="flex gap-1">
@@ -101,7 +117,7 @@ const AIAssistantChat = () => {
             variant="ghost"
             size="icon"
             onClick={() => setIsMinimized(!isMinimized)}
-            className="h-8 w-8"
+            className="h-9 w-9 rounded-xl hover:bg-primary/10 text-primary"
           >
             {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
           </Button>
@@ -109,7 +125,7 @@ const AIAssistantChat = () => {
             variant="ghost"
             size="icon"
             onClick={() => setIsOpen(false)}
-            className="h-8 w-8"
+            className="h-9 w-9 rounded-xl hover:bg-primary/10 text-primary"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -119,7 +135,7 @@ const AIAssistantChat = () => {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4" style={{ height: "360px" }} ref={scrollRef}>
+          <ScrollArea className="flex-1 p-4" style={{ height: "350px" }} ref={scrollRef}>
             <div className="space-y-4">
               {messages.map((msg, idx) => (
                 <div
@@ -127,20 +143,20 @@ const AIAssistantChat = () => {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                       msg.role === "user"
-                        ? "bg-gradient-primary text-white"
-                        : "bg-muted/50 text-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary/50 text-foreground border border-primary/10"
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                   </div>
                 </div>
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-muted/50 rounded-2xl px-4 py-2">
-                    <div className="flex gap-1">
+                  <div className="bg-secondary/50 rounded-2xl px-4 py-3 border border-primary/10">
+                    <div className="flex gap-1.5">
                       <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                       <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -151,8 +167,29 @@ const AIAssistantChat = () => {
             </div>
           </ScrollArea>
 
+          {/* Quick Actions */}
+          {messages.length <= 2 && (
+            <div className="px-4 pb-2">
+              <div className="flex flex-wrap gap-2">
+                {quickActions.map((action, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSend(action.prompt)}
+                    disabled={isLoading}
+                    className="rounded-full text-xs border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/40 transition-all"
+                  >
+                    <action.icon className="w-3 h-3 mr-1.5" />
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Input */}
-          <div className="p-4 border-t border-border/50 bg-gradient-subtle">
+          <div className="p-4 border-t-2 border-primary/10 bg-primary/5">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -163,15 +200,15 @@ const AIAssistantChat = () => {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder="Ask me anything about ReRoom AI..."
                 disabled={isLoading}
-                className="flex-1 bg-background/50 border-border/50 focus:border-primary transition-colors"
+                className="flex-1 bg-background border-2 border-primary/20 focus:border-primary rounded-xl text-foreground placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
                 size="icon"
                 disabled={isLoading || !input.trim()}
-                className="bg-gradient-primary hover:shadow-glow transition-all"
+                className="bg-primary hover:bg-primary/90 rounded-xl h-10 w-10 transition-all hover:shadow-glow"
               >
                 <Send className="w-4 h-4" />
               </Button>
