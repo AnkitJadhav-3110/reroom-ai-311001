@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -12,11 +14,18 @@ interface StreamOptions {
 export async function streamAIChat({ messages, onDelta, onDone }: StreamOptions) {
   const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
+  // Get the current session for authenticated requests
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session?.access_token) {
+    throw new Error("Please sign in to use the AI assistant");
+  }
+
   const response = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${session.access_token}`,
     },
     body: JSON.stringify({ messages }),
   });
@@ -28,7 +37,10 @@ export async function streamAIChat({ messages, onDelta, onDone }: StreamOptions)
     if (response.status === 402) {
       throw new Error("AI service credits depleted. Please contact support.");
     }
-    throw new Error("Failed to connect to AI assistant");
+    if (response.status === 401) {
+      throw new Error("Session expired. Please refresh the page and try again.");
+    }
+    throw new Error("Failed to connect to AI assistant. Please try again.");
   }
 
   if (!response.body) {

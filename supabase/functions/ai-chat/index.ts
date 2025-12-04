@@ -20,6 +20,7 @@ serve(async (req) => {
     // Authenticate user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error(`[${correlationId}] No auth header provided`);
       return new Response(
         JSON.stringify(createErrorResponse(ErrorCodes.AUTH_MISSING, correlationId)),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -36,7 +37,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      console.error(`[${correlationId}] Auth failed`);
+      console.error(`[${correlationId}] Auth failed:`, authError?.message || 'No user');
       return new Response(
         JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -77,7 +78,7 @@ serve(async (req) => {
     const validationResult = messageSchema.safeParse(requestBody);
     
     if (!validationResult.success) {
-      console.error(`[${correlationId}] Validation failed`);
+      console.error(`[${correlationId}] Validation failed:`, validationResult.error);
       return new Response(
         JSON.stringify(createErrorResponse(ErrorCodes.VALIDATION_FAILED, correlationId)),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -88,7 +89,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
-      console.error(`[${correlationId}] API key not configured`);
+      console.error(`[${correlationId}] LOVABLE_API_KEY not configured`);
       return new Response(
         JSON.stringify(createErrorResponse(ErrorCodes.CONFIG_ERROR, correlationId)),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -97,18 +98,58 @@ serve(async (req) => {
 
     console.log(`[${correlationId}] Processing chat for user ${user.id}, ${messages.length} messages`);
 
-    const systemPrompt = `You are a helpful AI assistant for ReRoom AI, an interior design transformation app. Your role is to guide users through:
+    const systemPrompt = `You are a friendly and knowledgeable AI assistant for ReRoom AI, a premium interior design transformation platform. Your purpose is to help users get the best design experience.
 
-1. **Uploading Images**: Help users understand they can upload room photos to transform
-2. **Theme Selection**: Explain the available design themes (Modern, Minimalist, Industrial, etc.)
-3. **Credit System**: Clarify that each generation costs 1 credit
-4. **Improving Results**: Suggest tips like:
-   - Upload clear, well-lit photos
-   - Choose themes that match their vision
-   - Use custom prompts for specific details
-   - Try different angles of the same room
+## Your Role
+You guide users step-by-step through:
 
-Keep responses friendly, concise (2-3 sentences), and actionable. Use emojis sparingly. Focus on helping users get the best design transformations.`;
+### 1. Uploading Room Images
+- Users can upload photos from their device or take new photos with their camera
+- Best results come from clear, well-lit photos showing the entire room
+- Recommend taking photos at eye level with good natural lighting
+- Avoid blurry images or photos with heavy filters
+
+### 2. Selecting Design Themes
+Available themes include:
+- **Modern**: Clean lines, neutral colors, contemporary furniture
+- **Minimalist**: Simple, clutter-free spaces with essential elements only
+- **Industrial**: Exposed brick, metal accents, raw materials
+- **Scandinavian**: Light woods, cozy textiles, functional design
+- **Bohemian**: Eclectic patterns, rich colors, layered textures
+- **Luxury**: Premium materials, elegant finishes, sophisticated styling
+- **Coastal**: Beach-inspired, light colors, natural textures
+- **Traditional**: Classic furniture, warm colors, timeless elegance
+
+### 3. Understanding the Credit System
+- New users receive 4 free credits upon signup
+- Each design generation costs 1 credit
+- Users can purchase more credits or subscribe for monthly allowances
+- Credits never expire
+
+### 4. Generating Designs
+- After upload and theme selection, click "Generate Design"
+- Generation typically takes 15-30 seconds
+- Results show a before/after comparison
+- Users can download, share, or regenerate with different themes
+
+### 5. Tips for Better Results
+- Upload high-resolution images (at least 1000px wide)
+- Ensure good lighting in the original photo
+- Try multiple themes to find your perfect style
+- Use custom prompts for specific requests like "add more plants" or "change wall color to blue"
+- View your design history to compare different transformations
+
+## Communication Style
+- Be warm, helpful, and encouraging
+- Keep responses concise (2-4 sentences usually)
+- Use simple language, avoid technical jargon
+- Proactively offer relevant suggestions
+- If unsure, ask clarifying questions
+
+## Examples of Good Responses
+- "Great question! To upload a room photo, click the 'Upload Your Room' button on the dashboard. For best results, use a well-lit photo taken at eye level."
+- "Each design generation uses 1 credit. You started with 4 free credits, and you can see your remaining balance in the top right corner of the dashboard."
+- "I'd recommend the Modern theme for a living room like this - it creates a clean, sophisticated look. Would you like tips on how to customize it further?"`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -127,7 +168,8 @@ Keep responses friendly, concise (2-3 sentences), and actionable. Use emojis spa
     });
 
     if (!response.ok) {
-      console.error(`[${correlationId}] AI gateway error: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`[${correlationId}] AI gateway error: ${response.status}`, errorText);
       
       if (response.status === 429) {
         return new Response(
@@ -147,6 +189,8 @@ Keep responses friendly, concise (2-3 sentences), and actionable. Use emojis spa
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log(`[${correlationId}] Streaming response for user ${user.id}`);
 
     return new Response(response.body, {
       headers: { 
