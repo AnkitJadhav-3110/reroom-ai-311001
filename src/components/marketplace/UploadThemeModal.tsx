@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,16 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+
+const themeSchema = z.object({
+  name: z.string().trim().min(1, "Theme name is required").max(100, "Theme name must be less than 100 characters"),
+  description: z.string().max(500, "Description must be less than 500 characters").optional(),
+  prompt: z.string().trim()
+    .min(10, "Prompt must be at least 10 characters")
+    .max(2000, "Prompt must be less than 2000 characters")
+    .regex(/^[a-zA-Z0-9\s.,!?'"-]+$/, "Prompt contains invalid characters"),
+  price: z.number().min(0).max(9999).optional(),
+});
 
 interface UploadThemeModalProps {
   open: boolean;
@@ -31,8 +42,17 @@ const UploadThemeModal = ({ open, onClose, onSuccess }: UploadThemeModalProps) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !prompt) {
-      toast.error("Please fill in required fields");
+    // Validate with Zod schema
+    const validationResult = themeSchema.safeParse({
+      name,
+      description: description || undefined,
+      prompt,
+      price: isFree ? undefined : parseInt(price) || 0,
+    });
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
@@ -46,13 +66,13 @@ const UploadThemeModal = ({ open, onClose, onSuccess }: UploadThemeModalProps) =
       }
 
       const { error } = await supabase.from("marketplace_themes").insert({
-        name,
-        description,
-        prompt,
+        name: validationResult.data.name,
+        description: validationResult.data.description || null,
+        prompt: validationResult.data.prompt,
         is_free: isFree,
-        price: isFree ? 0 : parseInt(price) || 0,
+        price: isFree ? 0 : validationResult.data.price || 0,
         creator_id: session.session.user.id,
-        is_approved: false, // Requires approval
+        is_approved: false,
       });
 
       if (error) throw error;
