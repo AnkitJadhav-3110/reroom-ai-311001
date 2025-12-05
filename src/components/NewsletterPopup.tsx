@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -68,18 +67,29 @@ const NewsletterPopup = () => {
     setLoading(true);
 
     try {
-      const { error: dbError } = await supabase
-        .from("newsletter_subscriptions")
-        .insert({
-          email: validatedEmail,
-        });
-
-      if (dbError) {
-        if (dbError.code === "23505") {
-          toast.info("You're already subscribed!");
-        } else {
-          throw dbError;
+      // Call server-side edge function with rate limiting
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/newsletter-signup`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: validatedEmail }),
         }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          toast.error("Too many attempts. Please try again later.");
+        } else {
+          throw new Error(data.error || "Failed to subscribe");
+        }
+        return;
+      }
+
+      if (data.duplicate) {
+        toast.info("You're already subscribed!");
       } else {
         toast.success("Welcome! Check your email for design tips.");
       }
