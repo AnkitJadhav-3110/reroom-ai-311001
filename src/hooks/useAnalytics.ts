@@ -20,7 +20,12 @@ export const useAnalytics = () => {
     async (eventType: EventType, eventData?: EventData) => {
       try {
         const { data: session } = await supabase.auth.getSession();
-        const userId = session.session?.user?.id || null;
+        const userId = session.session?.user?.id;
+
+        // Only track events for authenticated users (RLS requires auth)
+        if (!userId) {
+          return;
+        }
 
         await supabase.from("analytics_events").insert({
           user_id: userId,
