@@ -588,6 +588,7 @@ export type Database = {
       }
     }
     Functions: {
+      get_affiliate_by_code: { Args: { code: string }; Returns: string }
       get_user_credits: { Args: { p_user_id: string }; Returns: number }
       has_role: {
         Args: {
