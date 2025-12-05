@@ -31,40 +31,46 @@ const Auth = () => {
   }, [navigate]);
 
   const handleReferralAttribution = async (userId: string) => {
-    const referralCode = localStorage.getItem('referral_code');
+    const referralCode = localStorage.getItem("referral_code");
     if (!referralCode) return;
 
     try {
-      // Find affiliate by code
-      const { data: affiliate } = await supabase
-        .from('affiliate_profiles')
-        .select('id')
-        .eq('affiliate_code', referralCode)
-        .eq('is_approved', true)
-        .maybeSingle();
+      // Use secure RPC function to look up affiliate by code
+      // This bypasses RLS restrictions safely via SECURITY DEFINER
+      const { data: affiliateId, error: rpcError } = await supabase.rpc(
+        "get_affiliate_by_code",
+        { code: referralCode }
+      );
 
-      if (affiliate) {
+      if (rpcError) {
+        console.error("Error looking up affiliate:", rpcError);
+        localStorage.removeItem("referral_code");
+        return;
+      }
+
+      if (affiliateId) {
         // Check if referral already exists
         const { data: existingReferral } = await supabase
-          .from('referrals')
-          .select('id')
-          .eq('referred_user_id', userId)
+          .from("referrals")
+          .select("id")
+          .eq("referred_user_id", userId)
           .maybeSingle();
 
         if (!existingReferral) {
           // Create referral record
-          await supabase.from('referrals').insert({
-            affiliate_id: affiliate.id,
+          await supabase.from("referrals").insert({
+            affiliate_id: affiliateId,
             referred_user_id: userId,
-            status: 'pending'
+            status: "pending",
           });
         }
       }
 
       // Clear the referral code from localStorage
-      localStorage.removeItem('referral_code');
+      localStorage.removeItem("referral_code");
     } catch (error) {
-      console.error('Error processing referral:', error);
+      console.error("Error processing referral:", error);
+      localStorage.removeItem("referral_code");
     }
   };
 
@@ -75,12 +81,21 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-6 shadow-elegant">
             <Sparkles className="w-10 h-10 text-primary animate-parallax-float" />
           </div>
-          <h1 className="text-4xl font-serif font-bold text-foreground mb-3 tracking-tight">ReRoom AI</h1>
-          <p className="text-muted-foreground font-body tracking-wide">Design Without Limits</p>
-          <p className="text-sm text-muted-foreground/80 mt-2 font-body">Welcome to your digital atelier</p>
+          <h1 className="text-4xl font-serif font-bold text-foreground mb-3 tracking-tight">
+            ReRoom AI
+          </h1>
+          <p className="text-muted-foreground font-body tracking-wide">
+            Design Without Limits
+          </p>
+          <p className="text-sm text-muted-foreground/80 mt-2 font-body">
+            Welcome to your digital atelier
+          </p>
         </div>
 
-        <div className="bg-card rounded-3xl shadow-elegant p-10 border-2 border-primary/10 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <div
+          className="bg-card rounded-3xl shadow-elegant p-10 border-2 border-primary/10 backdrop-blur-sm animate-fade-in-up"
+          style={{ animationDelay: "0.1s" }}
+        >
           <SupabaseAuth
             supabaseClient={supabase}
             appearance={{
@@ -88,29 +103,29 @@ const Auth = () => {
               variables: {
                 default: {
                   colors: {
-                    brand: '#1E3B32',
-                    brandAccent: '#C8B88A',
-                    brandButtonText: '#FAFAF7',
-                    defaultButtonBackground: '#1E3B32',
-                    defaultButtonBackgroundHover: '#2A4F42',
-                    inputBackground: '#FAFAF7',
-                    inputBorder: '#E9E6E1',
-                    inputBorderFocus: '#1E3B32',
-                    inputBorderHover: '#C8B88A',
-                    inputText: '#1E3B32',
-                    inputLabelText: '#1E3B32',
-                    inputPlaceholder: '#1E3B32',
+                    brand: "#1E3B32",
+                    brandAccent: "#C8B88A",
+                    brandButtonText: "#FAFAF7",
+                    defaultButtonBackground: "#1E3B32",
+                    defaultButtonBackgroundHover: "#2A4F42",
+                    inputBackground: "#FAFAF7",
+                    inputBorder: "#E9E6E1",
+                    inputBorderFocus: "#1E3B32",
+                    inputBorderHover: "#C8B88A",
+                    inputText: "#1E3B32",
+                    inputLabelText: "#1E3B32",
+                    inputPlaceholder: "#1E3B32",
                   },
                   radii: {
-                    borderRadiusButton: '1rem',
-                    buttonBorderRadius: '1rem',
-                    inputBorderRadius: '0.75rem',
+                    borderRadiusButton: "1rem",
+                    buttonBorderRadius: "1rem",
+                    inputBorderRadius: "0.75rem",
                   },
                   fonts: {
-                    bodyFontFamily: 'Inter, sans-serif',
-                    buttonFontFamily: 'Outfit, sans-serif',
-                    inputFontFamily: 'Inter, sans-serif',
-                    labelFontFamily: 'Outfit, sans-serif',
+                    bodyFontFamily: "Inter, sans-serif",
+                    buttonFontFamily: "Outfit, sans-serif",
+                    inputFontFamily: "Inter, sans-serif",
+                    labelFontFamily: "Outfit, sans-serif",
                   },
                 },
               },
@@ -119,7 +134,7 @@ const Auth = () => {
             redirectTo={window.location.origin + "/dashboard"}
           />
         </div>
-        
+
         <p className="text-center mt-6 text-sm text-primary/70 font-medium">
           ⭐ 4 Free Credits — No Card Required
         </p>

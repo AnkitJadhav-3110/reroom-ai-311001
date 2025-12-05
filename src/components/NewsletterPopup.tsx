@@ -11,11 +11,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Sparkles, X } from "lucide-react";
+import { z } from "zod";
+
+// Email validation schema with proper constraints
+const emailSchema = z
+  .string()
+  .trim()
+  .email({ message: "Please enter a valid email address" })
+  .max(255, { message: "Email must be less than 255 characters" })
+  .refine(
+    (email) => !email.includes("+") || email.split("+").length <= 2,
+    { message: "Invalid email format" }
+  );
 
 const NewsletterPopup = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Show popup after 30 seconds if not dismissed before
@@ -33,33 +46,51 @@ const NewsletterPopup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    if (!email) {
-      toast.error("Please enter your email");
+    // Validate email using Zod schema
+    const validationResult = emailSchema.safeParse(email);
+    if (!validationResult.success) {
+      setError(validationResult.error.errors[0].message);
+      return;
+    }
+
+    const validatedEmail = validationResult.data;
+
+    // Rate limiting check on client side (basic protection)
+    const lastSubmit = localStorage.getItem("newsletter_last_submit");
+    const now = Date.now();
+    if (lastSubmit && now - parseInt(lastSubmit) < 60000) {
+      toast.error("Please wait a moment before trying again");
       return;
     }
 
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("newsletter_subscriptions").insert({
-        email,
-      });
+      const { error: dbError } = await supabase
+        .from("newsletter_subscriptions")
+        .insert({
+          email: validatedEmail,
+        });
 
-      if (error) {
-        if (error.code === "23505") {
+      if (dbError) {
+        if (dbError.code === "23505") {
           toast.info("You're already subscribed!");
         } else {
-          throw error;
+          throw dbError;
         }
       } else {
         toast.success("Welcome! Check your email for design tips.");
       }
 
       localStorage.setItem("newsletter_subscribed", "true");
+      localStorage.setItem("newsletter_last_submit", now.toString());
       setOpen(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to subscribe");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to subscribe";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,6 +99,11 @@ const NewsletterPopup = () => {
   const handleDismiss = () => {
     localStorage.setItem("newsletter_dismissed", "true");
     setOpen(false);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (error) setError(null);
   };
 
   return (
@@ -88,18 +124,26 @@ const NewsletterPopup = () => {
             Get Design Inspiration
           </DialogTitle>
           <DialogDescription>
-            Join 500+ designers getting weekly AI interior design tips, trends, and
-            exclusive prompts.
+            Join 500+ designers getting weekly AI interior design tips, trends,
+            and exclusive prompts.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <Input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="space-y-2">
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={handleEmailChange}
+              maxLength={255}
+              className={error ? "border-destructive" : ""}
+              autoComplete="email"
+            />
+            {error && (
+              <p className="text-xs text-destructive">{error}</p>
+            )}
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Subscribing..." : "Subscribe Free"}
           </Button>
