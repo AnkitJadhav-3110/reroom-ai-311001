@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Search, Plus, Download, Sparkles } from "lucide-react";
+import { Search, Plus, Download, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import PremiumFooter from "@/components/PremiumFooter";
 import UploadThemeModal from "@/components/marketplace/UploadThemeModal";
+import Header from "@/components/Header";
 
 interface MarketplaceTheme {
   id: string;
@@ -92,20 +93,7 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="container mx-auto px-4 py-6 border-b border-border/50">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          {userId && (
-            <Button onClick={() => setShowUploadModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Upload Theme
-            </Button>
-          )}
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">

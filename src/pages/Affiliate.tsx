@@ -85,8 +85,6 @@ const Affiliate = () => {
       const { error } = await supabase.from("affiliate_profiles").insert({
         user_id: userId,
         affiliate_code: code,
-        commission_rate: 20,
-        is_approved: true, // Auto-approve for now
       });
 
       if (error) throw error;
