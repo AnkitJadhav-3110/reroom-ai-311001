@@ -142,6 +142,7 @@ const Auth = () => {
           ⭐ 4 Free Credits — No Card Required
         </p>
       </div>
+      </div>
     </div>
   );
 };
