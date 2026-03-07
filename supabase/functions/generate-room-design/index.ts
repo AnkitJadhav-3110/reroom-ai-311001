@@ -105,35 +105,9 @@ serve(async (req) => {
       );
     }
 
-    // Check user credits server-side
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('credits')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError) {
-      console.error(`[${correlationId}] Profile fetch failed`);
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (!profile || profile.credits < 1) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log(`[${correlationId}] User has ${profile.credits} credits`);
-
-    // Deduct credit BEFORE generation to prevent race conditions
-    const { error: deductError } = await supabaseAdmin
-      .from('profiles')
-      .update({ credits: profile.credits - 1 })
-      .eq('id', user.id);
+    // Atomically deduct credit (prevents race conditions)
+    const { data: newCredits, error: deductError } = await supabaseAdmin
+      .rpc('deduct_credit', { p_user_id: user.id });
 
     if (deductError) {
       console.error(`[${correlationId}] Credit deduction failed`);
@@ -143,7 +117,14 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[${correlationId}] Credit deducted`);
+    if (newCredits === -1) {
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
+        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[${correlationId}] Credit deducted, remaining: ${newCredits}`);
 
     // Create the prompt based on theme or custom prompt
     const designPrompt = customPrompt || `Redesign this room interior in ${theme} style. Transform the space while maintaining the room's structure and layout. Apply ${theme} design elements, colors, furniture, and decor. Make it look professional and realistic.`;
@@ -207,10 +188,7 @@ serve(async (req) => {
 
     if (!generatedImageUrl) {
       // Refund the credit if image generation failed
-      await supabaseAdmin
-        .from('profiles')
-        .update({ credits: profile.credits })
-        .eq('id', user.id);
+      await supabaseAdmin.rpc('refund_credit', { p_user_id: user.id });
       
       console.error(`[${correlationId}] No image generated`);
       return new Response(
@@ -234,7 +212,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         generatedImageUrl,
-        creditsRemaining: profile.credits - 1
+        creditsRemaining: newCredits
       }),
       { 
         headers: { 

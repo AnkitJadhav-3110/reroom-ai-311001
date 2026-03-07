@@ -588,6 +588,7 @@ export type Database = {
       }
     }
     Functions: {
+      deduct_credit: { Args: { p_user_id: string }; Returns: number }
       get_affiliate_by_code: { Args: { code: string }; Returns: string }
       get_user_credits: { Args: { p_user_id: string }; Returns: number }
       has_role: {
@@ -597,6 +598,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      refund_credit: { Args: { p_user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
