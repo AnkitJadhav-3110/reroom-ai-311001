@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import PremiumFooter from "@/components/PremiumFooter";
 import SubscriptionCard from "@/components/dashboard/SubscriptionCard";
 import { useSubscription } from "@/hooks/useSubscription";
 import { toast } from "sonner";
+import Header from "@/components/Header";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -32,20 +31,7 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)]">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-6 border-b border-border/50">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          {!userId && (
-            <Button variant="outline" onClick={() => navigate("/auth")}>
-              Sign In
-            </Button>
-          )}
-        </div>
-      </header>
+      <Header />
 
       {/* Pricing Section */}
       <section className="container mx-auto px-4 py-20">

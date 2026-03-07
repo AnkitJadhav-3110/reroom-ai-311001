@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
   Users,
   DollarSign,
   Link as LinkIcon,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PremiumFooter from "@/components/PremiumFooter";
+import Header from "@/components/Header";
 
 interface AffiliateProfile {
   id: string;
@@ -119,12 +119,7 @@ const Affiliate = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="container mx-auto px-4 py-6 border-b border-border/50">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">

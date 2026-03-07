@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Wand2, Zap, Shield, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
-import MobileNavDrawer from "@/components/MobileNavDrawer";
+import Header from "@/components/Header";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -26,33 +26,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="container mx-auto px-4 xs:px-6 py-4 xs:py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 xs:gap-3">
-            <div className="w-10 h-10 xs:w-12 xs:h-12 rounded-xl xs:rounded-2xl bg-primary/10 flex items-center justify-center shadow-card">
-              <Sparkles className="w-5 h-5 xs:w-6 xs:h-6 text-primary" />
-            </div>
-            <div>
-              <span className="text-lg xs:text-xl font-serif font-bold text-foreground">ReRoom AI</span>
-              <p className="text-[10px] xs:text-xs text-muted-foreground">Design Without Limits</p>
-            </div>
-          </div>
-          
-          {/* Mobile hamburger menu */}
-          <MobileNavDrawer />
-          
-          {/* Desktop navigation */}
-          <div className="hidden md:flex gap-3">
-            <Button variant="ghost" onClick={() => navigate("/auth")} className="text-foreground hover:bg-primary/10">
-              Sign In
-            </Button>
-            <Button onClick={() => navigate("/auth")} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl shadow-card">
-              Get Started
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 xs:px-6 py-10 xs:py-16 md:py-20">

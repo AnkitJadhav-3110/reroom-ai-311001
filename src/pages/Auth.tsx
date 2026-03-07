@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Sparkles } from "lucide-react";
+import Header from "@/components/Header";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -75,7 +76,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="flex items-center justify-center p-4 pt-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-10 animate-fade-in-up">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-6 shadow-elegant">
@@ -138,6 +141,7 @@ const Auth = () => {
         <p className="text-center mt-6 text-sm text-primary/70 font-medium">
           ⭐ 4 Free Credits — No Card Required
         </p>
+      </div>
       </div>
     </div>
   );
