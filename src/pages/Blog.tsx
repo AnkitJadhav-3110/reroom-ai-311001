@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Calendar, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import PremiumFooter from "@/components/PremiumFooter";
+import Header from "@/components/Header";
 
 interface BlogPost {
   id: string;
@@ -42,12 +43,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="container mx-auto px-4 py-6 border-b border-border/50">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
