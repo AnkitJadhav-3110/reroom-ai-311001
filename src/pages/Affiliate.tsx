@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
   Users,
   DollarSign,
   Link as LinkIcon,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PremiumFooter from "@/components/PremiumFooter";
+import Header from "@/components/Header";
 
 interface AffiliateProfile {
   id: string;
