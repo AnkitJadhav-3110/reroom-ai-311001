@@ -212,7 +212,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         generatedImageUrl,
-        creditsRemaining: profile.credits - 1
+        creditsRemaining: newCredits
       }),
       { 
         headers: { 
