@@ -188,10 +188,7 @@ serve(async (req) => {
 
     if (!generatedImageUrl) {
       // Refund the credit if image generation failed
-      await supabaseAdmin
-        .from('profiles')
-        .update({ credits: profile.credits })
-        .eq('id', user.id);
+      await supabaseAdmin.rpc('refund_credit', { p_user_id: user.id });
       
       console.error(`[${correlationId}] No image generated`);
       return new Response(
