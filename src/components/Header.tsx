@@ -67,6 +67,20 @@ const Header = ({
                 </Button>
                 <Button
                   variant="ghost"
+                  onClick={() => navigate("/blog")}
+                  className="text-foreground hover:bg-primary/10"
+                >
+                  Blog
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/marketplace")}
+                  className="text-foreground hover:bg-primary/10"
+                >
+                  Marketplace
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => navigate("/auth")}
                   className="text-foreground hover:bg-primary/10"
                 >
