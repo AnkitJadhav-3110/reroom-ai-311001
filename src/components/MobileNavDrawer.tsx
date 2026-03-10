@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Sparkles, LogIn, UserPlus, Home, DollarSign, Users } from "lucide-react";
+import { Menu, X, Sparkles, LogIn, UserPlus, Home, DollarSign, Users, BookOpen, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
