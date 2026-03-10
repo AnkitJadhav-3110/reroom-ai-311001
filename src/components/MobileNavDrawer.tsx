@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Sparkles, LogIn, UserPlus, Home, DollarSign, Users, BookOpen, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ const navItems: NavItem[] = [
 const MobileNavDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNavigation = (href: string) => {
     setIsOpen(false);
@@ -59,16 +60,23 @@ const MobileNavDrawer = () => {
         </SheetHeader>
 
         <nav className="flex flex-col p-4 xs:p-6 space-y-2">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              onClick={() => handleNavigation(item.href)}
-              className="flex items-center gap-3 p-3 xs:p-4 rounded-xl text-foreground hover:bg-primary/10 transition-colors text-left w-full"
-            >
-              <span className="text-primary">{item.icon}</span>
-              <span className="text-sm xs:text-base font-medium">{item.label}</span>
-            </button>
-          ))}
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <button
+                key={item.label}
+                onClick={() => handleNavigation(item.href)}
+                className={`flex items-center gap-3 p-3 xs:p-4 rounded-xl transition-colors text-left w-full ${
+                  isActive
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-foreground hover:bg-primary/10"
+                }`}
+              >
+                <span className={isActive ? "text-primary" : "text-primary"}>{item.icon}</span>
+                <span className="text-sm xs:text-base font-medium">{item.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 xs:p-6 border-t border-border bg-background space-y-3">

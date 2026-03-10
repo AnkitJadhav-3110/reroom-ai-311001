@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
@@ -11,6 +11,12 @@ interface HeaderProps {
   className?: string;
 }
 
+const navLinks = [
+  { label: "Pricing", href: "/pricing" },
+  { label: "Blog", href: "/blog" },
+  { label: "Marketplace", href: "/marketplace" },
+];
+
 const Header = ({
   showBack = false,
   showAuthButtons = true,
@@ -19,6 +25,7 @@ const Header = ({
   className = "",
 }: HeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <header
@@ -52,33 +59,24 @@ const Header = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Mobile hamburger menu */}
             <MobileNavDrawer />
 
-            {/* Desktop navigation */}
             {showAuthButtons && (
               <div className="hidden md:flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/pricing")}
-                  className="text-foreground hover:bg-primary/10"
-                >
-                  Pricing
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/blog")}
-                  className="text-foreground hover:bg-primary/10"
-                >
-                  Blog
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/marketplace")}
-                  className="text-foreground hover:bg-primary/10"
-                >
-                  Marketplace
-                </Button>
+                {navLinks.map((link) => (
+                  <Button
+                    key={link.href}
+                    variant="ghost"
+                    onClick={() => navigate(link.href)}
+                    className={`hover:bg-primary/10 ${
+                      location.pathname === link.href
+                        ? "text-primary bg-primary/10 font-semibold"
+                        : "text-foreground"
+                    }`}
+                  >
+                    {link.label}
+                  </Button>
+                ))}
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/auth")}
