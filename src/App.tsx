@@ -15,7 +15,7 @@ import Affiliate from "./pages/Affiliate";
 import Blog from "./pages/Blog";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
-import NewsletterPopup from "./components/NewsletterPopup";
+
 
 const queryClient = new QueryClient();
 
@@ -39,7 +39,6 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <NewsletterPopup />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

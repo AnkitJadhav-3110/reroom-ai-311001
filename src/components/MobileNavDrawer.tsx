@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Sparkles, LogIn, UserPlus, Home, DollarSign, Users } from "lucide-react";
+import { Menu, X, Sparkles, LogIn, UserPlus, Home, DollarSign, Users, BookOpen, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,6 +19,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Home", href: "/", icon: <Home className="w-5 h-5" /> },
   { label: "Pricing", href: "/pricing", icon: <DollarSign className="w-5 h-5" /> },
+  { label: "Blog", href: "/blog", icon: <BookOpen className="w-5 h-5" /> },
+  { label: "Marketplace", href: "/marketplace", icon: <Store className="w-5 h-5" /> },
   { label: "Affiliate", href: "/affiliate", icon: <Users className="w-5 h-5" /> },
 ];
 
