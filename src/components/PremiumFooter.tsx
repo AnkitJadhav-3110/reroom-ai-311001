@@ -116,12 +116,12 @@ const PremiumFooter = () => {
             © 2025 ReRoom AI. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#privacy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors font-subheading">
+            <Link to="/privacy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors font-subheading">
               Privacy Policy
-            </a>
-            <a href="#terms" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors font-subheading">
+            </Link>
+            <Link to="/terms" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors font-subheading">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>
