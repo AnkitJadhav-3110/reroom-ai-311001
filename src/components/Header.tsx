@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 interface HeaderProps {
   showBack?: boolean;
