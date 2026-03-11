@@ -15,7 +15,8 @@ import Affiliate from "./pages/Affiliate";
 import Blog from "./pages/Blog";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
-
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,8 @@ const App = () => (
           <Route path="/affiliate" element={<Affiliate />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

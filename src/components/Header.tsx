@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 interface HeaderProps {
   showBack?: boolean;
@@ -58,7 +59,8 @@ const Header = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <DarkModeToggle />
             <MobileNavDrawer />
 
             {showAuthButtons && (
