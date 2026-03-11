@@ -15,7 +15,8 @@ import Affiliate from "./pages/Affiliate";
 import Blog from "./pages/Blog";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
-
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
