@@ -5,6 +5,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { encode as encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { checkRateLimit } from '../_shared/rateLimiter.ts';
 import { ErrorCodes, createErrorResponse } from '../_shared/errorCodes.ts';
+import { isProductionRequest, buildDesignPrompt } from './logic.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,157 +13,153 @@ const corsHeaders = {
 };
 
 const UNLIMITED_EMAIL = 'test@test.com';
-// Production guard: when true, the unlimited test account is rejected entirely
-// so a real end-user can never authenticate as it and abuse the API.
-const IS_PRODUCTION = (Deno.env.get('ENVIRONMENT') ?? '').toLowerCase() === 'production';
 
 serve(async (req) => {
   const correlationId = crypto.randomUUID();
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // KEY ROTATION SUPPORT: read the secret fresh on every request. Updating
+  // GEMINI_API_KEY in Supabase secrets takes effect on the next invocation
+  // — no code redeploy required. Never log or return this value.
+  const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+
+  // Always-create admin client; we use it both for auth + audit even on early returns.
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  const audit = async (
+    user_id: string | null,
+    mode: 'theme' | 'prompt',
+    status: string,
+    extras: { theme?: string; credit_cost?: number; error_code?: string } = {},
+  ) => {
+    if (!user_id) return;
+    try {
+      await supabaseAdmin.from('generation_audit_log').insert({
+        user_id, mode, status,
+        theme: extras.theme ?? null,
+        credit_cost: extras.credit_cost ?? 0,
+        correlation_id: correlationId,
+        error_code: extras.error_code ?? null,
+      });
+    } catch (_) { /* never let audit failures break the request */ }
+  };
 
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.AUTH_MISSING, correlationId)),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.AUTH_MISSING, correlationId)),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
 
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-
     if (authError || !user) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const isTestAccount = user.email === UNLIMITED_EMAIL;
 
-    // Production guard — test/demo account is disabled in production
-    if (isTestAccount && IS_PRODUCTION) {
+    // Production guard: blocks the unlimited demo account on the live published
+    // domain regardless of credentials. Driven by request Origin/Referer plus
+    // an optional ENVIRONMENT=production secret override.
+    const inProd = isProductionRequest({
+      origin: req.headers.get('origin'),
+      referer: req.headers.get('referer'),
+      envFlag: Deno.env.get('ENVIRONMENT') ?? null,
+    });
+    if (isTestAccount && inProd) {
       console.warn(`[${correlationId}] Test account blocked in production`);
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, 'theme', 'blocked', { error_code: 'TEST_ACCOUNT_IN_PROD' });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Rate limiting still applies to non-test users
     if (!isTestAccount) {
-      const rateLimit = checkRateLimit(user.id, 'generate-room-design', {
-        maxRequests: 10,
-        windowMs: 60 * 60 * 1000
-      });
-      if (!rateLimit.allowed) {
-        return new Response(
-          JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      const rl = checkRateLimit(user.id, 'generate-room-design', { maxRequests: 10, windowMs: 60 * 60 * 1000 });
+      if (!rl.allowed) {
+        await audit(user.id, 'theme', 'rate_limited', { error_code: ErrorCodes.RATE_LIMIT_EXCEEDED.code });
+        return new Response(JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
     }
 
     const requestBody = await req.json();
     const inputSchema = z.object({
       imageUrl: z.string().url().max(2048),
-      theme: z.enum(['modern', 'luxury', 'minimalist', 'contemporary', 'rustic', 'industrial']).optional(),
-      customPrompt: z.string().max(500).regex(/^[a-zA-Z0-9\s.,!?'-]+$/).optional()
+      theme: z.enum(['modern','luxury','minimalist','contemporary','rustic','industrial']).optional(),
+      customPrompt: z.string().max(500).regex(/^[a-zA-Z0-9\s.,!?'-]+$/).optional(),
     });
-    const validationResult = inputSchema.safeParse(requestBody);
-    if (!validationResult.success) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.VALIDATION_FAILED, correlationId)),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const parsed = inputSchema.safeParse(requestBody);
+    if (!parsed.success) {
+      await audit(user.id, 'theme', 'validation_failed', { error_code: ErrorCodes.VALIDATION_FAILED.code });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.VALIDATION_FAILED, correlationId)),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const { imageUrl, theme, customPrompt } = parsed.data;
+    const mode: 'theme' | 'prompt' = customPrompt ? 'prompt' : 'theme';
 
-    const { imageUrl, theme, customPrompt } = validationResult.data;
-    // SECURITY: Gemini API key is ONLY read from server env. Never logged, never returned to client.
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.CONFIG_ERROR, correlationId)),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, mode, 'failed', { theme, error_code: ErrorCodes.CONFIG_ERROR.code });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.CONFIG_ERROR, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Always deduct exactly 1 credit per generation — applies to test account too.
-    // Test account is seeded with ~1B credits so it remains effectively unlimited,
-    // but each generation costs exactly one credit (no zero-cost path).
-    const { data: deducted, error: deductError } = await supabaseAdmin
-      .rpc('deduct_credit', { p_user_id: user.id });
+    // 1 credit per generation (test account included; it's seeded with ~1B credits).
+    const { data: deducted, error: deductError } = await supabaseAdmin.rpc('deduct_credit', { p_user_id: user.id });
     if (deductError) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, mode, 'failed', { theme, error_code: ErrorCodes.SERVICE_ERROR.code });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     if (deducted === -1) {
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, mode, 'insufficient_credits', { theme, error_code: ErrorCodes.INSUFFICIENT_CREDITS.code });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
+        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     const newCredits = deducted;
+    const designPrompt = buildDesignPrompt({ customPrompt, theme });
 
-    const designPrompt = customPrompt || `Redesign this room interior in ${theme} style. Transform the space while maintaining the room's structure and layout. Apply ${theme} design elements, colors, furniture, and decor. Make it look professional and realistic.`;
-
-    // Fetch the source image and convert to base64 for Gemini inline_data
     const imgResp = await fetch(imageUrl);
     if (!imgResp.ok) {
       await supabaseAdmin.rpc('refund_credit', { p_user_id: user.id });
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, mode, 'failed', { theme, credit_cost: 0, error_code: 'IMAGE_FETCH_FAILED' });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     const imgBytes = new Uint8Array(await imgResp.arrayBuffer());
     const imgBase64 = encodeBase64(imgBytes);
     const mimeType = imgResp.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
 
-    // SECURITY: do NOT log the API key, URL containing the key, or any header value.
-    console.log(`[${correlationId}] Calling Gemini for user ${user.id}${isTestAccount ? ' (test)' : ''} mode=${customPrompt ? 'prompt' : 'theme'}`);
+    console.log(`[${correlationId}] Calling Gemini for user ${user.id}${isTestAccount ? ' (test)' : ''} mode=${mode}`);
 
-    // Pass the key via header (not query string) so it never appears in URL-based logs.
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`;
-    const response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+        body: JSON.stringify({
+          contents: [{ parts: [
             { text: designPrompt },
-            { inline_data: { mime_type: mimeType, data: imgBase64 } }
-          ]
-        }],
-        generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
-      })
-    });
+            { inline_data: { mime_type: mimeType, data: imgBase64 } },
+          ]}],
+          generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
+        }),
+      },
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      // Scrub any accidental key occurrence before logging upstream errors.
       const safeErr = errText.replaceAll(GEMINI_API_KEY, '[REDACTED]');
       console.error(`[${correlationId}] Gemini error: ${response.status} ${safeErr}`);
       await supabaseAdmin.rpc('refund_credit', { p_user_id: user.id });
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, mode, 'failed', { theme, credit_cost: 0, error_code: `GEMINI_${response.status}` });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const data = await response.json();
@@ -171,34 +168,28 @@ serve(async (req) => {
     const inline = imagePart?.inline_data || imagePart?.inlineData;
     const b64 = inline?.data;
     const outMime = inline?.mime_type || inline?.mimeType || 'image/png';
-
     if (!b64) {
       await supabaseAdmin.rpc('refund_credit', { p_user_id: user.id });
-      console.error(`[${correlationId}] No image in Gemini response`);
-      return new Response(
-        JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await audit(user.id, mode, 'failed', { theme, credit_cost: 0, error_code: 'GEMINI_NO_IMAGE' });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.GENERATION_FAILED, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const generatedImageUrl = `data:${outMime};base64,${b64}`;
 
     await supabaseAdmin.from('credit_transactions').insert({
-      user_id: user.id,
-      amount: -1,
-      transaction_type: 'design_generation',
-      description: `Generated ${theme || 'custom'} design${isTestAccount ? ' (test account)' : ''}`
+      user_id: user.id, amount: -1, transaction_type: 'design_generation',
+      description: `Generated ${theme || 'custom'} design${isTestAccount ? ' (test account)' : ''}`,
     });
+    await audit(user.id, mode, 'success', { theme, credit_cost: 1 });
 
     return new Response(
       JSON.stringify({ generatedImageUrl, creditsRemaining: newCredits }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (error) {
     console.error(`[${correlationId}] Error:`, error instanceof Error ? error.message : 'Unknown');
-    return new Response(
-      JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
