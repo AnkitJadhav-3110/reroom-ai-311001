@@ -1,0 +1,33 @@
+name: Security Checks
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  gemini-key-safety:
+    name: Gemini API Key Exposure Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Gemini key safety scan
+        run: bash scripts/check-gemini-key-safety.sh
+
+  edge-function-tests:
+    name: Edge Function Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Run edge function tests
+        run: deno test --allow-env --allow-read supabase/functions/generate-room-design/index.test.ts
