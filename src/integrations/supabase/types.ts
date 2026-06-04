@@ -272,6 +272,42 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_audit_log: {
+        Row: {
+          correlation_id: string | null
+          created_at: string
+          credit_cost: number
+          error_code: string | null
+          id: string
+          mode: string
+          status: string
+          theme: string | null
+          user_id: string
+        }
+        Insert: {
+          correlation_id?: string | null
+          created_at?: string
+          credit_cost?: number
+          error_code?: string | null
+          id?: string
+          mode: string
+          status: string
+          theme?: string | null
+          user_id: string
+        }
+        Update: {
+          correlation_id?: string | null
+          created_at?: string
+          credit_cost?: number
+          error_code?: string | null
+          id?: string
+          mode?: string
+          status?: string
+          theme?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       marketplace_themes: {
         Row: {
           created_at: string | null
