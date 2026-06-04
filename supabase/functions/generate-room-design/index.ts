@@ -12,6 +12,9 @@ const corsHeaders = {
 };
 
 const UNLIMITED_EMAIL = 'test@test.com';
+// Production guard: when true, the unlimited test account is rejected entirely
+// so a real end-user can never authenticate as it and abuse the API.
+const IS_PRODUCTION = (Deno.env.get('ENVIRONMENT') ?? '').toLowerCase() === 'production';
 
 serve(async (req) => {
   const correlationId = crypto.randomUUID();
@@ -45,10 +48,19 @@ serve(async (req) => {
       );
     }
 
-    const isUnlimitedUser = user.email === UNLIMITED_EMAIL;
+    const isTestAccount = user.email === UNLIMITED_EMAIL;
 
-    // Skip rate limiting for unlimited test user
-    if (!isUnlimitedUser) {
+    // Production guard — test/demo account is disabled in production
+    if (isTestAccount && IS_PRODUCTION) {
+      console.warn(`[${correlationId}] Test account blocked in production`);
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Rate limiting still applies to non-test users
+    if (!isTestAccount) {
       const rateLimit = checkRateLimit(user.id, 'generate-room-design', {
         maxRequests: 10,
         windowMs: 60 * 60 * 1000
@@ -76,6 +88,7 @@ serve(async (req) => {
     }
 
     const { imageUrl, theme, customPrompt } = validationResult.data;
+    // SECURITY: Gemini API key is ONLY read from server env. Never logged, never returned to client.
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
       return new Response(
@@ -84,25 +97,24 @@ serve(async (req) => {
       );
     }
 
-    // Deduct credit unless unlimited test user
-    let newCredits = 999999;
-    if (!isUnlimitedUser) {
-      const { data: deducted, error: deductError } = await supabaseAdmin
-        .rpc('deduct_credit', { p_user_id: user.id });
-      if (deductError) {
-        return new Response(
-          JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (deducted === -1) {
-        return new Response(
-          JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      newCredits = deducted;
+    // Always deduct exactly 1 credit per generation — applies to test account too.
+    // Test account is seeded with ~1B credits so it remains effectively unlimited,
+    // but each generation costs exactly one credit (no zero-cost path).
+    const { data: deducted, error: deductError } = await supabaseAdmin
+      .rpc('deduct_credit', { p_user_id: user.id });
+    if (deductError) {
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.SERVICE_ERROR, correlationId)),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+    if (deducted === -1) {
+      return new Response(
+        JSON.stringify(createErrorResponse(ErrorCodes.INSUFFICIENT_CREDITS, correlationId)),
+        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const newCredits = deducted;
 
     const designPrompt = customPrompt || `Redesign this room interior in ${theme} style. Transform the space while maintaining the room's structure and layout. Apply ${theme} design elements, colors, furniture, and decor. Make it look professional and realistic.`;
 
