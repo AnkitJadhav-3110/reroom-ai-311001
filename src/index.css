@@ -280,6 +280,27 @@ All colors MUST be HSL.
     animation: pulse-subtle 2s ease-in-out infinite;
   }
 
+  /* Before/After hero crossfade loop (acts as a lightweight "video loop") */
+  @keyframes beforeAfterLoop {
+    0%, 40% { opacity: 0; }
+    50%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .before-after-loop {
+    animation: beforeAfterLoop 5s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .before-after-loop,
+    .animate-parallax-float,
+    .animate-gold-glow,
+    .animate-pulse-subtle,
+    .animate-scan,
+    .animate-fade-in-up {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+  }
+
   /* Fix touch target size for Lovable badge close button */
   #lovable-badge-close {
     min-width: 24px !important;
