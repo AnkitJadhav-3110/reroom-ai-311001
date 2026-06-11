@@ -1,96 +1,74 @@
 import { Link } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="border-t-2 border-primary/10 bg-card/50 backdrop-blur-sm mt-20">
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+    <footer
+      className="mt-24 text-primary-foreground"
+      style={{ background: "var(--gradient-footer)" }}
+      aria-label="Site footer"
+    >
+      <div className="container mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pb-12 border-b border-accent/30">
+          {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-2xl bg-accent/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-accent" />
               </div>
-              <span className="text-lg font-serif font-bold text-foreground">ReRoom AI</span>
+              <div>
+                <div className="font-serif text-lg">ReRoom AI</div>
+                <div className="text-[10px] tracking-[0.2em] uppercase text-accent/80">
+                  Design Without Limits
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Transform your space with AI-powered interior design
+            <p className="font-serif italic text-primary-foreground/70 leading-relaxed max-w-xs">
+              "Technology Inspired by Taste."
             </p>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Product</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Marketplace
-                </Link>
-              </li>
+          {/* Navigation */}
+          <div className="md:justify-self-center">
+            <h3 className="font-subheading text-sm tracking-[0.2em] uppercase text-accent mb-5">
+              Explore
+            </h3>
+            <ul className="space-y-3 font-subheading">
+              <li><Link to="/pricing" className="hover:text-accent transition-colors">Pricing</Link></li>
+              <li><Link to="/marketplace" className="hover:text-accent transition-colors">Features</Link></li>
+              <li><Link to="/blog" className="hover:text-accent transition-colors">Blog</Link></li>
+              <li><Link to="/affiliate" className="hover:text-accent transition-colors">Partners</Link></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Company</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/affiliate" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Affiliate
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Connect</h3>
-            <ul className="space-y-3">
-              <li>
-                <a href="#twitter" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a href="#instagram" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a href="#linkedin" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  LinkedIn
-                </a>
-              </li>
-            </ul>
+          {/* Social */}
+          <div className="md:justify-self-end">
+            <h3 className="font-subheading text-sm tracking-[0.2em] uppercase text-accent mb-5">
+              Connect
+            </h3>
+            <div className="flex items-center gap-3 mb-5">
+              <a href="https://twitter.com/reroomai" aria-label="Twitter" className="w-10 h-10 rounded-full border border-accent/30 flex items-center justify-center hover:bg-accent hover:text-primary transition-all">
+                <Twitter className="w-4 h-4" />
+              </a>
+              <a href="https://instagram.com/reroomai" aria-label="Instagram" className="w-10 h-10 rounded-full border border-accent/30 flex items-center justify-center hover:bg-accent hover:text-primary transition-all">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="https://linkedin.com/company/reroomai" aria-label="LinkedIn" className="w-10 h-10 rounded-full border border-accent/30 flex items-center justify-center hover:bg-accent hover:text-primary transition-all">
+                <Linkedin className="w-4 h-4" />
+              </a>
+            </div>
+            <a href="mailto:hello@reroomai.com" className="inline-flex items-center gap-2 text-sm text-primary-foreground/80 hover:text-accent transition-colors">
+              <Mail className="w-4 h-4" /> hello@reroomai.com
+            </a>
           </div>
         </div>
 
-        <div className="border-t-2 border-primary/10 mt-10 pt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ReRoom AI. All rights reserved.
-          </p>
+        <div className="pt-8 flex flex-col md:flex-row justify-between gap-4 text-xs text-primary-foreground/60 font-subheading">
+          <p>© {new Date().getFullYear()} ReRoom AI. All rights reserved.</p>
+          <div className="flex gap-6">
+            <Link to="/privacy" className="hover:text-accent transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-accent transition-colors">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>
