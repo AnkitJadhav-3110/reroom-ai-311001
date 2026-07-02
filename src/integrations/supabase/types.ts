@@ -353,30 +353,6 @@ export type Database = {
         }
         Relationships: []
       }
-      newsletter_subscriptions: {
-        Row: {
-          email: string
-          id: string
-          is_subscribed: boolean | null
-          subscribed_at: string | null
-          unsubscribed_at: string | null
-        }
-        Insert: {
-          email: string
-          id?: string
-          is_subscribed?: boolean | null
-          subscribed_at?: string | null
-          unsubscribed_at?: string | null
-        }
-        Update: {
-          email?: string
-          id?: string
-          is_subscribed?: boolean | null
-          subscribed_at?: string | null
-          unsubscribed_at?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -385,8 +361,6 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
           subscription_status: string | null
           subscription_tier: string | null
           updated_at: string
@@ -398,8 +372,6 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           updated_at?: string
@@ -411,11 +383,27 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          bucket_key: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          hits?: number
+          window_start: string
+        }
+        Update: {
+          bucket_key?: string
+          hits?: number
+          window_start?: string
         }
         Relationships: []
       }
@@ -624,8 +612,21 @@ export type Database = {
       }
     }
     Functions: {
+      check_and_increment_rate_limit: {
+        Args: {
+          p_bucket_key: string
+          p_max_requests: number
+          p_window_seconds: number
+        }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          reset_at: string
+        }[]
+      }
       deduct_credit: { Args: { p_user_id: string }; Returns: number }
       get_affiliate_by_code: { Args: { code: string }; Returns: string }
+      get_theme_prompt: { Args: { p_theme_id: string }; Returns: string }
       get_user_credits: { Args: { p_user_id: string }; Returns: number }
       has_role: {
         Args: {
