@@ -5,14 +5,27 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { encode as encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { checkRateLimit } from '../_shared/rateLimiter.ts';
 import { ErrorCodes, createErrorResponse } from '../_shared/errorCodes.ts';
-import { isProductionRequest, buildDesignPrompt } from './logic.ts';
+import { buildDesignPrompt } from './logic.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const UNLIMITED_EMAIL = 'test@test.com';
+// SSRF defence: only allow image URLs that resolve to Supabase Storage
+// (the app's only legitimate source). Add extra hosts here if new
+// upload providers are wired in.
+const ALLOWED_IMAGE_HOSTS = ['supabase.co', 'supabase.in'];
+function isAllowedImageUrl(u: string): boolean {
+  try {
+    const url = new URL(u);
+    if (url.protocol !== 'https:') return false;
+    const host = url.hostname.toLowerCase();
+    return ALLOWED_IMAGE_HOSTS.some((d) => host === d || host.endsWith('.' + d));
+  } catch {
+    return false;
+  }
+}
 
 serve(async (req) => {
   const correlationId = crypto.randomUUID();
