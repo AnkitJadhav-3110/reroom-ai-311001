@@ -144,7 +144,7 @@ serve(async (req) => {
     const imgBase64 = encodeBase64(imgBytes);
     const mimeType = imgResp.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
 
-    console.log(`[${correlationId}] Calling Gemini for user ${user.id}${isTestAccount ? ' (test)' : ''} mode=${mode}`);
+    console.log(`[${correlationId}] Calling Gemini for user ${user.id} mode=${mode}`);
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`,
