@@ -1,50 +1,60 @@
-// Simple in-memory rate limiter for edge functions
-// For production, consider using Redis or Supabase Edge Cache
+// Persistent, cross-instance rate limiter backed by the public.rate_limits
+// table via the SECURITY DEFINER RPC `check_and_increment_rate_limit`.
+// The in-memory Map implementation is intentionally removed: it did not work
+// across Deno isolates or cold starts.
+//
+// Callers must pass a Supabase client authenticated with the service role
+// (edge functions already use SUPABASE_SERVICE_ROLE_KEY).
 
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
-
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitStore.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
 
 export interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
 }
 
-export function checkRateLimit(
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetTime: number;
+}
+
+let _client: SupabaseClient | null = null;
+function admin(): SupabaseClient {
+  if (_client) return _client;
+  _client = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+  return _client;
+}
+
+export async function checkRateLimit(
   userId: string,
   endpoint: string,
-  config: RateLimitConfig
-): { allowed: boolean; remaining: number; resetTime: number } {
-  const key = `${endpoint}:${userId}`;
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
+  config: RateLimitConfig,
+): Promise<RateLimitResult> {
+  const bucketKey = `${endpoint}:${userId}`;
+  const windowSeconds = Math.max(1, Math.floor(config.windowMs / 1000));
 
-  if (!entry || now > entry.resetTime) {
-    // Create new entry
-    const resetTime = now + config.windowMs;
-    rateLimitStore.set(key, { count: 1, resetTime });
-    return { allowed: true, remaining: config.maxRequests - 1, resetTime };
+  try {
+    const { data, error } = await admin().rpc('check_and_increment_rate_limit', {
+      p_bucket_key: bucketKey,
+      p_window_seconds: windowSeconds,
+      p_max_requests: config.maxRequests,
+    });
+    if (error || !data || (Array.isArray(data) && data.length === 0)) {
+      // Fail-closed on backend error to prevent flooding.
+      return { allowed: false, remaining: 0, resetTime: Date.now() + config.windowMs };
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      allowed: !!row.allowed,
+      remaining: Number(row.remaining ?? 0),
+      resetTime: new Date(row.reset_at).getTime(),
+    };
+  } catch (_) {
+    return { allowed: false, remaining: 0, resetTime: Date.now() + config.windowMs };
   }
-
-  if (entry.count >= config.maxRequests) {
-    return { allowed: false, remaining: 0, resetTime: entry.resetTime };
-  }
-
-  // Increment count
-  entry.count++;
-  rateLimitStore.set(key, entry);
-  return { allowed: true, remaining: config.maxRequests - entry.count, resetTime: entry.resetTime };
 }
