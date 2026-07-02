@@ -188,7 +188,7 @@ serve(async (req) => {
 
     await supabaseAdmin.from('credit_transactions').insert({
       user_id: user.id, amount: -1, transaction_type: 'design_generation',
-      description: `Generated ${theme || 'custom'} design${isTestAccount ? ' (test account)' : ''}`,
+      description: `Generated ${theme || 'custom'} design`,
     });
     await audit(user.id, mode, 'success', { theme, credit_cost: 1 });
 
