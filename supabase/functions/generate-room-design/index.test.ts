@@ -14,7 +14,8 @@ import {
   buildDesignPrompt,
   shouldBypassCreditDeduction,
 } from "./logic.ts";
-import { checkRateLimit } from "../_shared/rateLimiter.ts";
+// NOTE: rate limiter is now DB-backed (public.rate_limits + RPC).
+// Its behavior is covered by the e2e tests against the deployed function.
 
 /* ----------------------------- pure helpers ----------------------------- */
 
@@ -59,27 +60,11 @@ Deno.test("production guard: explicit ENVIRONMENT=production forces production m
 });
 
 /* ---------------------------- rate limiting ----------------------------- */
+// The in-memory limiter was removed because it did not survive isolate
+// boundaries. Its replacement is verified by the e2e test suite which
+// hits the deployed edge function repeatedly and asserts a 429 after
+// the configured maximum.
 
-Deno.test("rate limiter: allows up to maxRequests, then blocks", () => {
-  const userId = `rate-${crypto.randomUUID()}`;
-  const cfg = { maxRequests: 3, windowMs: 60_000 };
-
-  const a = checkRateLimit(userId, "test-endpoint", cfg);
-  const b = checkRateLimit(userId, "test-endpoint", cfg);
-  const c = checkRateLimit(userId, "test-endpoint", cfg);
-  const d = checkRateLimit(userId, "test-endpoint", cfg);
-
-  assert(a.allowed && b.allowed && c.allowed, "first three calls should be allowed");
-  assert(!d.allowed, "fourth call must be rate-limited");
-  assertEquals(d.remaining, 0);
-});
-
-Deno.test("rate limiter: separate users have independent buckets", () => {
-  const cfg = { maxRequests: 1, windowMs: 60_000 };
-  const a = checkRateLimit(`u1-${crypto.randomUUID()}`, "ep", cfg);
-  const b = checkRateLimit(`u2-${crypto.randomUUID()}`, "ep", cfg);
-  assert(a.allowed && b.allowed);
-});
 
 /* -------------------- credit deduction & refund flow -------------------- */
 //
