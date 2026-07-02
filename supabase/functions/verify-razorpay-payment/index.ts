@@ -74,11 +74,46 @@ serve(async (req) => {
       });
     }
 
-    // Get plan details
+    // Anti plan-substitution: the HMAC only covers order_id|payment_id, so
+    // the client-supplied `planId` is not trustworthy. Fetch the order
+    // authoritatively from Razorpay and compare against `notes.plan_id`
+    // that we stamped when the order was created.
+    const orderResp = await fetch(
+      `https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`,
+      {
+        headers: {
+          Authorization: `Basic ${btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`)}`,
+        },
+      },
+    );
+    if (!orderResp.ok) {
+      console.error("Failed to fetch Razorpay order for verification", orderResp.status);
+      return new Response(JSON.stringify({ error: "Unable to verify order" }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const rzpOrder = await orderResp.json();
+    const authoritativePlanId: string | undefined = rzpOrder?.notes?.plan_id;
+    const authoritativeUserId: string | undefined = rzpOrder?.notes?.user_id;
+    if (!authoritativePlanId || authoritativePlanId !== planId || authoritativeUserId !== user.id) {
+      console.warn("Plan/user mismatch during payment verification", {
+        client_plan: planId,
+        order_plan: authoritativePlanId,
+        client_user: user.id,
+        order_user: authoritativeUserId,
+      });
+      return new Response(JSON.stringify({ error: "Plan mismatch" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get plan details using the authoritative planId from the order.
     const { data: plan, error: planError } = await supabase
       .from("subscription_plans")
       .select("*")
-      .eq("id", planId)
+      .eq("id", authoritativePlanId)
       .single();
 
     if (planError || !plan) {
