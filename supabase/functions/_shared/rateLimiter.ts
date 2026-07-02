@@ -1,10 +1,10 @@
-// Persistent, cross-instance rate limiter backed by the public.rate_limits
-// table via the SECURITY DEFINER RPC `check_and_increment_rate_limit`.
-// The in-memory Map implementation is intentionally removed: it did not work
-// across Deno isolates or cold starts.
+// Persistent, cross-instance rate limiter backed by public.rate_limits
+// via the SECURITY DEFINER RPC `check_and_increment_rate_limit`.
+// The prior in-memory Map did not survive isolate boundaries or cold
+// starts and therefore did not enforce limits.
 //
-// Callers must pass a Supabase client authenticated with the service role
-// (edge functions already use SUPABASE_SERVICE_ROLE_KEY).
+// Requires service-role credentials in the environment (already available
+// to every edge function).
 
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
 
@@ -44,8 +44,8 @@ export async function checkRateLimit(
       p_window_seconds: windowSeconds,
       p_max_requests: config.maxRequests,
     });
-    if (error || !data || (Array.isArray(data) && data.length === 0)) {
-      // Fail-closed on backend error to prevent flooding.
+    if (error || !data) {
+      // Fail-closed: never let a backend outage remove the throttle.
       return { allowed: false, remaining: 0, resetTime: Date.now() + config.windowMs };
     }
     const row = Array.isArray(data) ? data[0] : data;
