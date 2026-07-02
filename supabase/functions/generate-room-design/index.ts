@@ -75,30 +75,17 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const isTestAccount = user.email === UNLIMITED_EMAIL;
-
-    // Production guard: blocks the unlimited demo account on the live published
-    // domain regardless of credentials. Driven by request Origin/Referer plus
-    // an optional ENVIRONMENT=production secret override.
-    const inProd = isProductionRequest({
-      origin: req.headers.get('origin'),
-      referer: req.headers.get('referer'),
-      envFlag: Deno.env.get('ENVIRONMENT') ?? null,
+    // Rate limiting for every caller — 10 generations/hour. The former
+    // "test account" bypass has been removed along with the seeded
+    // credentials; no user is allowed to skip throttling.
+    const rl = await checkRateLimit(user.id, 'generate-room-design', {
+      maxRequests: 10,
+      windowMs: 60 * 60 * 1000,
     });
-    if (isTestAccount && inProd) {
-      console.warn(`[${correlationId}] Test account blocked in production`);
-      await audit(user.id, 'theme', 'blocked', { error_code: 'TEST_ACCOUNT_IN_PROD' });
-      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    if (!isTestAccount) {
-      const rl = checkRateLimit(user.id, 'generate-room-design', { maxRequests: 10, windowMs: 60 * 60 * 1000 });
-      if (!rl.allowed) {
-        await audit(user.id, 'theme', 'rate_limited', { error_code: ErrorCodes.RATE_LIMIT_EXCEEDED.code });
-        return new Response(JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
+    if (!rl.allowed) {
+      await audit(user.id, 'theme', 'rate_limited', { error_code: ErrorCodes.RATE_LIMIT_EXCEEDED.code });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const requestBody = await req.json();
