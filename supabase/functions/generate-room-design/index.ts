@@ -5,14 +5,27 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { encode as encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { checkRateLimit } from '../_shared/rateLimiter.ts';
 import { ErrorCodes, createErrorResponse } from '../_shared/errorCodes.ts';
-import { isProductionRequest, buildDesignPrompt } from './logic.ts';
+import { buildDesignPrompt } from './logic.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const UNLIMITED_EMAIL = 'test@test.com';
+// SSRF defence: only allow image URLs that resolve to Supabase Storage
+// (the app's only legitimate source). Add extra hosts here if new
+// upload providers are wired in.
+const ALLOWED_IMAGE_HOSTS = ['supabase.co', 'supabase.in'];
+function isAllowedImageUrl(u: string): boolean {
+  try {
+    const url = new URL(u);
+    if (url.protocol !== 'https:') return false;
+    const host = url.hostname.toLowerCase();
+    return ALLOWED_IMAGE_HOSTS.some((d) => host === d || host.endsWith('.' + d));
+  } catch {
+    return false;
+  }
+}
 
 serve(async (req) => {
   const correlationId = crypto.randomUUID();
@@ -62,30 +75,17 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const isTestAccount = user.email === UNLIMITED_EMAIL;
-
-    // Production guard: blocks the unlimited demo account on the live published
-    // domain regardless of credentials. Driven by request Origin/Referer plus
-    // an optional ENVIRONMENT=production secret override.
-    const inProd = isProductionRequest({
-      origin: req.headers.get('origin'),
-      referer: req.headers.get('referer'),
-      envFlag: Deno.env.get('ENVIRONMENT') ?? null,
+    // Rate limiting for every caller — 10 generations/hour. The former
+    // "test account" bypass has been removed along with the seeded
+    // credentials; no user is allowed to skip throttling.
+    const rl = await checkRateLimit(user.id, 'generate-room-design', {
+      maxRequests: 10,
+      windowMs: 60 * 60 * 1000,
     });
-    if (isTestAccount && inProd) {
-      console.warn(`[${correlationId}] Test account blocked in production`);
-      await audit(user.id, 'theme', 'blocked', { error_code: 'TEST_ACCOUNT_IN_PROD' });
-      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.AUTH_INVALID, correlationId)),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    if (!isTestAccount) {
-      const rl = checkRateLimit(user.id, 'generate-room-design', { maxRequests: 10, windowMs: 60 * 60 * 1000 });
-      if (!rl.allowed) {
-        await audit(user.id, 'theme', 'rate_limited', { error_code: ErrorCodes.RATE_LIMIT_EXCEEDED.code });
-        return new Response(JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
+    if (!rl.allowed) {
+      await audit(user.id, 'theme', 'rate_limited', { error_code: ErrorCodes.RATE_LIMIT_EXCEEDED.code });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const requestBody = await req.json();
@@ -102,6 +102,15 @@ serve(async (req) => {
     }
     const { imageUrl, theme, customPrompt } = parsed.data;
     const mode: 'theme' | 'prompt' = customPrompt ? 'prompt' : 'theme';
+
+    // SSRF guard: only accept Supabase Storage URLs. Without this, an
+    // authenticated caller could point the fetch at internal metadata
+    // endpoints or arbitrary hosts.
+    if (!isAllowedImageUrl(imageUrl)) {
+      await audit(user.id, mode, 'validation_failed', { theme, error_code: 'IMAGE_URL_NOT_ALLOWED' });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.VALIDATION_FAILED, correlationId)),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     if (!GEMINI_API_KEY) {
       await audit(user.id, mode, 'failed', { theme, error_code: ErrorCodes.CONFIG_ERROR.code });
@@ -135,7 +144,7 @@ serve(async (req) => {
     const imgBase64 = encodeBase64(imgBytes);
     const mimeType = imgResp.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
 
-    console.log(`[${correlationId}] Calling Gemini for user ${user.id}${isTestAccount ? ' (test)' : ''} mode=${mode}`);
+    console.log(`[${correlationId}] Calling Gemini for user ${user.id} mode=${mode}`);
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`,
@@ -179,7 +188,7 @@ serve(async (req) => {
 
     await supabaseAdmin.from('credit_transactions').insert({
       user_id: user.id, amount: -1, transaction_type: 'design_generation',
-      description: `Generated ${theme || 'custom'} design${isTestAccount ? ' (test account)' : ''}`,
+      description: `Generated ${theme || 'custom'} design`,
     });
     await audit(user.id, mode, 'success', { theme, credit_cost: 1 });
 

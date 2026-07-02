@@ -44,8 +44,8 @@ serve(async (req) => {
       );
     }
 
-    // Rate limiting: 50 chat requests per hour
-    const rateLimit = checkRateLimit(user.id, 'ai-chat', {
+    // Rate limiting: 50 chat requests per hour (DB-backed, cross-instance)
+    const rateLimit = await checkRateLimit(user.id, 'ai-chat', {
       maxRequests: 50,
       windowMs: 60 * 60 * 1000
     });
@@ -54,22 +54,24 @@ serve(async (req) => {
       console.warn(`[${correlationId}] Rate limit exceeded for user ${user.id}`);
       return new Response(
         JSON.stringify(createErrorResponse(ErrorCodes.RATE_LIMIT_EXCEEDED, correlationId)),
-        { 
-          status: 429, 
-          headers: { 
-            ...corsHeaders, 
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
             'Content-Type': 'application/json',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': new Date(rateLimit.resetTime).toISOString()
-          } 
+          }
         }
       );
     }
 
-    // Validate input
+    // Validate input — only 'user' and 'assistant' are accepted from the
+    // client. The real system prompt is injected server-side below and
+    // must not be displaceable via a client-supplied 'system' message.
     const messageSchema = z.object({
       messages: z.array(z.object({
-        role: z.enum(['user', 'assistant', 'system']),
+        role: z.enum(['user', 'assistant']),
         content: z.string().max(2000)
       })).max(50)
     });
