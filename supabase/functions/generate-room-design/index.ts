@@ -103,6 +103,15 @@ serve(async (req) => {
     const { imageUrl, theme, customPrompt } = parsed.data;
     const mode: 'theme' | 'prompt' = customPrompt ? 'prompt' : 'theme';
 
+    // SSRF guard: only accept Supabase Storage URLs. Without this, an
+    // authenticated caller could point the fetch at internal metadata
+    // endpoints or arbitrary hosts.
+    if (!isAllowedImageUrl(imageUrl)) {
+      await audit(user.id, mode, 'validation_failed', { theme, error_code: 'IMAGE_URL_NOT_ALLOWED' });
+      return new Response(JSON.stringify(createErrorResponse(ErrorCodes.VALIDATION_FAILED, correlationId)),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     if (!GEMINI_API_KEY) {
       await audit(user.id, mode, 'failed', { theme, error_code: ErrorCodes.CONFIG_ERROR.code });
       return new Response(JSON.stringify(createErrorResponse(ErrorCodes.CONFIG_ERROR, correlationId)),
