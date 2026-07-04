@@ -222,7 +222,7 @@ const Index = () => {
                 alt="Before and After AI Room Design Transformation — empty living room before"
                 width={1536}
                 height={1024}
-                fetchPriority="high"
+                {...({ fetchpriority: "high" } as Record<string, string>)}
                 decoding="async"
                 className="absolute inset-0 w-full h-full object-cover"
               />
