@@ -123,6 +123,30 @@ serve(async (req) => {
       });
     }
 
+    // Idempotency guard: reject replay of the same Razorpay payment.
+    const { error: dedupeError } = await supabase
+      .from("processed_payments")
+      .insert({
+        razorpay_payment_id,
+        user_id: user.id,
+        plan_id: authoritativePlanId,
+        credits_awarded: plan.credits_per_month,
+      });
+    if (dedupeError) {
+      // Unique violation => payment already processed.
+      if ((dedupeError as { code?: string }).code === "23505") {
+        return new Response(
+          JSON.stringify({ error: "Payment already processed" }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      console.error("processed_payments insert failed", dedupeError);
+      return new Response(JSON.stringify({ error: "Unable to record payment" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Create or update subscription
     const now = new Date();
     const periodEnd = new Date(now);

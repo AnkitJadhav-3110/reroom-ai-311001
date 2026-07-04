@@ -353,6 +353,30 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_payments: {
+        Row: {
+          created_at: string
+          credits_awarded: number
+          plan_id: string | null
+          razorpay_payment_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_awarded?: number
+          plan_id?: string | null
+          razorpay_payment_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_awarded?: number
+          plan_id?: string | null
+          razorpay_payment_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
