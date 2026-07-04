@@ -47,7 +47,7 @@ const Marketplace = () => {
   const fetchThemes = async () => {
     const { data, error } = await supabase
       .from("marketplace_themes")
-      .select("*")
+      .select("id, creator_id, name, description, preview_image_url, price, is_free, is_approved, download_count, created_at, updated_at")
       .eq("is_approved", true)
       .order("download_count", { ascending: false });
 
