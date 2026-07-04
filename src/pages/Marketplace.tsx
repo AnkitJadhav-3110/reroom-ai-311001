@@ -15,7 +15,7 @@ interface MarketplaceTheme {
   id: string;
   name: string;
   description: string | null;
-  prompt: string;
+  // `prompt` is intentionally not selectable from the client; fetched via get_theme_prompt RPC after purchase.
   preview_image_url: string | null;
   price: number | null;
   is_free: boolean | null;
