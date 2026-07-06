@@ -60,7 +60,7 @@ const SubscriptionCard = ({
       <div className="text-center mb-6">
         <h3 className="text-xl font-serif font-bold text-foreground mb-2">{plan.name}</h3>
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-4xl font-bold text-foreground">₹{plan.price_monthly * 83}</span>
+          <span className="text-4xl font-bold text-foreground">₹{Math.round((plan.price_monthly / 100) * 83).toLocaleString("en-IN")}</span>
           <span className="text-muted-foreground">/month</span>
         </div>
         <p className="text-sm text-muted-foreground mt-2">
