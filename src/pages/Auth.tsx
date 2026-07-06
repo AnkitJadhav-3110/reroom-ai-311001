@@ -134,7 +134,7 @@ const Auth = () => {
               },
             }}
             providers={[]}
-            redirectTo={window.location.origin + "/dashboard"}
+            redirectTo={window.location.origin + "/reset-password"}
           />
         </div>
 
