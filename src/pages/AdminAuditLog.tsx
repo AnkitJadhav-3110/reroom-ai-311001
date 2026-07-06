@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import DemoAccountCard from "@/components/admin/DemoAccountCard";
 
 type AuditRow = {
   id: string;
@@ -167,6 +168,8 @@ export default function AdminAuditLog() {
             Filter and inspect AI generation events. The Gemini API key is never stored in this log.
           </p>
         </header>
+
+        <DemoAccountCard />
 
         <Card>
           <CardHeader>
