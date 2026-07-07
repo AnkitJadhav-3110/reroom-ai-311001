@@ -47,7 +47,7 @@ const features = [
 const testimonials = [
   {
     quote:
-      "ReRoom AI changed how I present concepts. Clients see the vision in seconds.",
+      "Velora Studios changed how I present concepts. Clients see the vision in seconds.",
     name: "Anaïs Laurent",
     role: "Interior Designer, Paris",
   },
@@ -110,11 +110,11 @@ const blogPosts = [
 
 const faqs = [
   {
-    q: "How does ReRoom AI generate interior designs?",
+    q: "How does Velora Studios generate interior designs?",
     a: "Upload a photo of your room and choose a design mood. Our AI, trained on global design archives, transforms your space into a luxury-grade render in seconds.",
   },
   {
-    q: "Is ReRoom AI free to try?",
+    q: "Is Velora Studios free to try?",
     a: "Yes — every new account receives 4 free credits, no credit card required. Additional credits are available via flexible subscription plans.",
   },
   {
@@ -122,7 +122,7 @@ const faqs = [
     a: "From Japandi and Scandinavian minimalism to Luxury Elegance, Industrial, and Coastal — every theme is crafted with real designers.",
   },
   {
-    q: "Can I use ReRoom AI designs commercially?",
+    q: "Can I use Velora Studios designs commercially?",
     a: "Yes. Paid plans include commercial usage rights and high-resolution client-ready exports without watermarks.",
   },
 ];
@@ -228,7 +228,7 @@ const Index = () => {
               />
               <img
                 src={heroAfter}
-                alt="Luxury Living Room Redesign by ReRoom AI — Japandi forest green styling"
+                alt="Luxury Living Room Redesign by Velora Studios — Japandi forest green styling"
                 width={1536}
                 height={1024}
                 decoding="async"
@@ -468,7 +468,7 @@ const Index = () => {
               <span className="italic text-accent">by Taste.</span>
             </h2>
             <p className="font-subheading text-lg text-primary/80 leading-relaxed mb-4">
-              ReRoom AI was born from a belief that design intelligence should
+              Velora Studios was born from a belief that design intelligence should
               feel as considered as the work itself.
             </p>
             <p className="text-muted-foreground leading-relaxed">

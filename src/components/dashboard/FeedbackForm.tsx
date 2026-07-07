@@ -93,7 +93,7 @@ const FeedbackForm = ({ userId }: FeedbackFormProps) => {
             <Label htmlFor="feedback">Your Feedback</Label>
             <Textarea
               id="feedback"
-              placeholder="Tell us what you think about ReRoom AI..."
+              placeholder="Tell us what you think about Velora Studios..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               className="mt-2 min-h-32"

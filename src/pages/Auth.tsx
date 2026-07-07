@@ -85,7 +85,7 @@ const Auth = () => {
             <Sparkles className="w-10 h-10 text-primary animate-parallax-float" />
           </div>
           <h1 className="text-4xl font-serif font-bold text-foreground mb-3 tracking-tight">
-            ReRoom AI
+            Velora Studios
           </h1>
           <p className="text-muted-foreground font-body tracking-wide">
             Design Without Limits

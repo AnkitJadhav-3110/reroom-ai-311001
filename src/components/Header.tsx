@@ -51,7 +51,7 @@ const Header = ({
             </div>
             <div className="min-w-0">
               <span className="text-base xs:text-lg sm:text-xl font-serif font-bold text-foreground tracking-tight truncate block">
-                ReRoom AI
+                Velora Studios
               </span>
               <p className="text-[9px] xs:text-[10px] sm:text-xs text-muted-foreground -mt-0.5 hidden xs:block">
                 Design Without Limits

@@ -169,7 +169,7 @@ const GeneratedDesignResult = ({
                   />
                   {/* Luxury watermark */}
                   <div className="absolute bottom-4 right-4 bg-forest-green/90 text-warm-white px-4 py-2 rounded-xl text-xs backdrop-blur-md font-subheading shadow-elegant">
-                    Made with ReRoom AI
+                    Made with Velora Studios
                   </div>
                 </div>
               </div>
@@ -215,7 +215,7 @@ const GeneratedDesignResult = ({
                 variant="outline"
                 size="sm"
                 className="rounded-2xl border-champagne-gold/30 hover:bg-stone/20 text-forest-green font-subheading"
-                onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out my AI-generated room design from ReRoom AI! ${shareUrl}`)}`, '_blank')}
+                onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out my AI-generated room design from Velora Studios! ${shareUrl}`)}`, '_blank')}
               >
                 Share on WhatsApp
               </Button>
@@ -223,7 +223,7 @@ const GeneratedDesignResult = ({
                 variant="outline"
                 size="sm"
                 className="rounded-2xl border-champagne-gold/30 hover:bg-stone/20 text-forest-green font-subheading"
-                onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=Check out my AI-generated room design from ReRoom AI!`, '_blank')}
+                onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=Check out my AI-generated room design from Velora Studios!`, '_blank')}
               >
                 Share on Twitter
               </Button>

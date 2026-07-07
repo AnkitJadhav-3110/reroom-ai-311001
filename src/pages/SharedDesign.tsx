@@ -170,7 +170,7 @@ const SharedDesign = () => {
             <div className="flex justify-center gap-4 pt-4">
               <Button
                 onClick={() =>
-                  handleDownload(generatedImageUrl, `reroom-design-${design.id}.png`)
+                  handleDownload(generatedImageUrl, `velora-design-${design.id}.png`)
                 }
                 disabled={!generatedImageUrl}
               >
@@ -186,7 +186,7 @@ const SharedDesign = () => {
             Create your own AI-powered room designs
           </p>
           <Button onClick={() => navigate("/auth")}>
-            Get Started with ReRoom AI
+            Get Started with Velora Studios
           </Button>
         </div>
       </div>

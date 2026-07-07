@@ -59,7 +59,7 @@ const PrivacyPolicy = () => {
 
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-3">10. Contact Us</h2>
-            <p>For privacy-related inquiries, contact us at <a href="mailto:hello@reroomai.com" className="text-primary hover:underline">hello@reroomai.com</a>.</p>
+            <p>For privacy-related inquiries, contact us at <a href="mailto:hello@velorastudios.com" className="text-primary hover:underline">hello@velorastudios.com</a>.</p>
           </section>
         </div>
       </main>

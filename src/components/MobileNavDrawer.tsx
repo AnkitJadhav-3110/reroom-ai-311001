@@ -53,7 +53,7 @@ const MobileNavDrawer = () => {
               <Sparkles className="w-5 h-5 xs:w-6 xs:h-6 text-primary" />
             </div>
             <div className="text-left">
-              <span className="text-lg xs:text-xl font-serif font-bold text-foreground block">ReRoom AI</span>
+              <span className="text-lg xs:text-xl font-serif font-bold text-foreground block">Velora Studios</span>
               <span className="text-xs text-muted-foreground">Design Without Limits</span>
             </div>
           </SheetTitle>
