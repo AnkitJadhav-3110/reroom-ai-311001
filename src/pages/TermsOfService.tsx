@@ -14,12 +14,12 @@ const TermsOfService = () => {
         <div className="space-y-8 text-foreground/90 leading-relaxed">
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using ReRoom AI ("Service"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
+            <p>By accessing or using Velora Studios ("Service"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
           </section>
 
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-3">2. Description of Service</h2>
-            <p>ReRoom AI provides AI-powered interior design generation tools. Users can upload room photos, select design themes, and receive AI-generated redesign suggestions. The Service operates on a credit-based system.</p>
+            <p>Velora Studios provides AI-powered interior design generation tools. Users can upload room photos, select design themes, and receive AI-generated redesign suggestions. The Service operates on a credit-based system.</p>
           </section>
 
           <section>
@@ -34,7 +34,7 @@ const TermsOfService = () => {
 
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-3">5. Intellectual Property</h2>
-            <p>You retain ownership of images you upload. AI-generated designs are licensed to you for personal and commercial use upon generation. ReRoom AI retains the right to use anonymized, aggregated data to improve our models.</p>
+            <p>You retain ownership of images you upload. AI-generated designs are licensed to you for personal and commercial use upon generation. Velora Studios retains the right to use anonymized, aggregated data to improve our models.</p>
           </section>
 
           <section>
@@ -44,7 +44,7 @@ const TermsOfService = () => {
 
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-3">7. Limitation of Liability</h2>
-            <p>ReRoom AI is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability shall not exceed the amount paid by you in the preceding 12 months.</p>
+            <p>Velora Studios is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability shall not exceed the amount paid by you in the preceding 12 months.</p>
           </section>
 
           <section>
@@ -59,7 +59,7 @@ const TermsOfService = () => {
 
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-3">10. Contact</h2>
-            <p>For questions about these Terms, contact us at <a href="mailto:hello@reroomai.com" className="text-primary hover:underline">hello@reroomai.com</a>.</p>
+            <p>For questions about these Terms, contact us at <a href="mailto:hello@velorastudios.com" className="text-primary hover:underline">hello@velorastudios.com</a>.</p>
           </section>
         </div>
       </main>

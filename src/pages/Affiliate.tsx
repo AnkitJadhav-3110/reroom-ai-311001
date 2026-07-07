@@ -135,7 +135,7 @@ const Affiliate = () => {
               <Users className="w-16 h-16 mx-auto text-primary mb-4" />
               <h2 className="text-2xl font-semibold mb-2">Join Our Affiliate Program</h2>
               <p className="text-muted-foreground mb-6">
-                Share ReRoom AI with your audience and earn 20% commission on every
+                Share Velora Studios with your audience and earn 20% commission on every
                 subscription purchase.
               </p>
               <ul className="text-left space-y-2 mb-6">

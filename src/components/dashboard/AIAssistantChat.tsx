@@ -16,7 +16,7 @@ const quickActions = [
   { label: "How to upload?", icon: Upload, prompt: "How do I upload a room photo for transformation?" },
   { label: "Theme guide", icon: Palette, prompt: "What design themes are available and which one should I choose?" },
   { label: "Credit system", icon: CreditCard, prompt: "How do credits work and how many do I have?" },
-  { label: "Get help", icon: HelpCircle, prompt: "I need help getting started with ReRoom AI" },
+  { label: "Get help", icon: HelpCircle, prompt: "I need help getting started with Velora Studios" },
 ];
 
 const AIAssistantChat = () => {
@@ -25,7 +25,7 @@ const AIAssistantChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! 👋 I'm your ReRoom AI assistant. I can help you transform any room with AI-powered design. Ask me about uploading images, choosing themes, or how credits work. What would you like to know?",
+      content: "Hi! 👋 I'm your Velora Studios assistant. I can help you transform any room with AI-powered design. Ask me about uploading images, choosing themes, or how credits work. What would you like to know?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -200,7 +200,7 @@ const AIAssistantChat = () => {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything about ReRoom AI..."
+                placeholder="Ask me anything about Velora Studios..."
                 disabled={isLoading}
                 className="flex-1 bg-background border-2 border-primary/20 focus:border-primary rounded-xl text-foreground placeholder:text-muted-foreground"
               />

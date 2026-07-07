@@ -59,7 +59,7 @@ export const useRazorpay = () => {
           key: orderData.keyId,
           amount: orderData.amount,
           currency: orderData.currency,
-          name: "ReRoom AI",
+          name: "Velora Studios",
           description: `${orderData.plan.name} Subscription`,
           order_id: orderData.orderId,
           handler: async (response: any) => {

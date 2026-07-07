@@ -60,7 +60,7 @@ const PremiumIndex = () => {
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base sm:text-xl font-serif font-bold text-foreground tracking-tight truncate">ReRoom AI</h1>
+                <h1 className="text-base sm:text-xl font-serif font-bold text-foreground tracking-tight truncate">Velora Studios</h1>
                 <p className="text-[9px] sm:text-[10px] text-muted-foreground -mt-0.5 hidden xs:block">Design Without Limits</p>
               </div>
             </div>

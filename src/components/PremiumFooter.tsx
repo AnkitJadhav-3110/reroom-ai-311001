@@ -13,7 +13,7 @@ const PremiumFooter = () => {
                 <Sparkles className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h3 className="text-xl font-serif font-semibold">ReRoom AI</h3>
+                <h3 className="text-xl font-serif font-semibold">Velora Studios</h3>
                 <p className="text-xs text-accent/80">Technology Inspired by Taste</p>
               </div>
             </div>
@@ -71,7 +71,7 @@ const PremiumFooter = () => {
             <h4 className="font-semibold text-accent border-b border-accent/30 pb-2">Connect</h4>
             <div className="flex gap-3">
               <a
-                href="https://twitter.com/reroomai"
+                href="https://twitter.com/velorastudios"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center hover:bg-accent/30 transition-all hover:scale-110"
@@ -80,7 +80,7 @@ const PremiumFooter = () => {
                 <Twitter className="w-4 h-4 text-accent" />
               </a>
               <a
-                href="https://linkedin.com/company/reroomai"
+                href="https://linkedin.com/company/velorastudios"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center hover:bg-accent/30 transition-all hover:scale-110"
@@ -89,7 +89,7 @@ const PremiumFooter = () => {
                 <Linkedin className="w-4 h-4 text-accent" />
               </a>
               <a
-                href="https://instagram.com/reroomai"
+                href="https://instagram.com/velorastudios"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center hover:bg-accent/30 transition-all hover:scale-110"
@@ -100,11 +100,11 @@ const PremiumFooter = () => {
             </div>
             <div className="pt-2">
               <a 
-                href="mailto:hello@reroomai.com" 
+                href="mailto:hello@velorastudios.com" 
                 className="text-sm text-primary-foreground/80 hover:text-accent transition-colors flex items-center gap-2 font-subheading"
               >
                 <Mail className="w-4 h-4" />
-                hello@reroomai.com
+                hello@velorastudios.com
               </a>
             </div>
           </div>
@@ -113,7 +113,7 @@ const PremiumFooter = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-accent/20 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/70 font-subheading">
-            © 2025 ReRoom AI. All rights reserved.
+            © 2025 Velora Studios. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link to="/privacy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors font-subheading">

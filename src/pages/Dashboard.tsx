@@ -88,7 +88,7 @@ const Dashboard = () => {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-serif font-bold text-foreground tracking-tight">ReRoom AI</h1>
+              <h1 className="text-2xl font-serif font-bold text-foreground tracking-tight">Velora Studios</h1>
               <p className="text-xs text-muted-foreground font-body tracking-wide hidden sm:block">Design Without Limits</p>
             </div>
           </div>
