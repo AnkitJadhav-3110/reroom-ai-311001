@@ -19,10 +19,8 @@ const navLinks = [
 ];
 
 const Header = ({
-  showBack = false,
   showAuthButtons = true,
   sticky = false,
-  isScrolled = false,
   className = "",
 }: HeaderProps) => {
   const navigate = useNavigate();
@@ -31,69 +29,77 @@ const Header = ({
   return (
     <header
       className={`${
-        sticky
-          ? `fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-              isScrolled
-                ? "bg-background/95 backdrop-blur-lg shadow-[var(--shadow-card)] border-b border-border/50"
-                : "bg-transparent"
-            }`
-          : "border-b border-border/50"
-      } ${className}`}
+        sticky ? "fixed top-3 sm:top-4 left-0 right-0 z-50" : "sticky top-3 sm:top-4 z-50"
+      } px-3 sm:px-4 ${className}`}
     >
-      <div className="container mx-auto px-4 xs:px-6 py-3 xs:py-4 sm:py-6">
-        <div className="flex items-center justify-between gap-2">
-          <div
-            className="flex items-center gap-2 xs:gap-3 min-w-0 cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            <div className="w-9 h-9 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-xl xs:rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 shadow-card">
-              <Sparkles className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-base xs:text-lg sm:text-xl font-serif font-bold text-foreground tracking-tight truncate block">
-                Velora Studios
-              </span>
-              <p className="text-[9px] xs:text-[10px] sm:text-xs text-muted-foreground -mt-0.5 hidden xs:block">
-                Design Without Limits
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-2">
-            <DarkModeToggle />
-            <MobileNavDrawer />
-
-            {showAuthButtons && (
-              <div className="hidden md:flex items-center gap-3">
-                {navLinks.map((link) => (
-                  <Button
-                    key={link.href}
-                    variant="ghost"
-                    onClick={() => navigate(link.href)}
-                    className={`hover:bg-primary/10 ${
-                      location.pathname === link.href
-                        ? "text-primary bg-primary/10 font-semibold"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {link.label}
-                  </Button>
-                ))}
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/auth")}
-                  className="text-foreground hover:bg-primary/10"
-                >
-                  Sign In
-                </Button>
-                <Button
-                  onClick={() => navigate("/auth")}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl shadow-card"
-                >
-                  Get Started
-                </Button>
+      <div className="container mx-auto">
+        <div className="glass-nav rounded-2xl shadow-[var(--shadow-card)] px-3 sm:px-5 py-2.5 sm:py-3">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 sm:gap-3 min-w-0 group"
+              aria-label="Velora Studios home"
+            >
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-[image:var(--gradient-primary)] shadow-[var(--shadow-glow)] group-hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.5),0_12px_40px_-8px_hsl(var(--primary)/0.6)] transition-shadow">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
-            )}
+              <div className="min-w-0 text-left">
+                <span className="text-base sm:text-lg font-display font-semibold text-foreground tracking-tight truncate block">
+                  Velora Studios
+                </span>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground -mt-0.5 hidden xs:block font-mono uppercase tracking-[0.15em]">
+                  AI · Design
+                </p>
+              </div>
+            </button>
+
+            <div className="flex items-center gap-1 sm:gap-2">
+              {showAuthButtons && (
+                <nav className="hidden md:flex items-center gap-1 mr-2">
+                  {navLinks.map((link) => {
+                    const active = location.pathname === link.href;
+                    return (
+                      <button
+                        key={link.href}
+                        onClick={() => navigate(link.href)}
+                        className={`relative px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
+                          active
+                            ? "text-primary"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {active && (
+                          <span className="absolute inset-0 rounded-full bg-primary/10 border border-primary/20" />
+                        )}
+                        <span className="relative">{link.label}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              )}
+
+              <DarkModeToggle />
+              <MobileNavDrawer />
+
+              {showAuthButtons && (
+                <div className="hidden md:flex items-center gap-2 ml-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate("/auth")}
+                    className="text-foreground"
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
