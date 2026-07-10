@@ -183,35 +183,38 @@ All colors MUST be HSL.
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-weight: 400;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
+    font-feature-settings: 'ss01', 'cv11';
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Space Grotesk', 'Sora', 'Inter', sans-serif;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.035em;
     @apply text-foreground;
   }
 
+  h1 { letter-spacing: -0.045em; font-weight: 700; }
+
   em, i, .font-italic-serif {
-    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-family: 'Space Grotesk', 'Sora', sans-serif;
     font-style: italic;
-    color: hsl(var(--accent));
+    font-weight: 500;
+    background: var(--gradient-cta);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .font-subheading {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
 
-  .font-body {
-    font-family: 'Inter', sans-serif;
-  }
-
-  .font-display {
-    font-family: 'Playfair Display', serif;
-  }
+  .font-body { font-family: 'Inter', sans-serif; }
+  .font-display { font-family: 'Space Grotesk', 'Sora', sans-serif; letter-spacing: -0.035em; }
+  .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 
   /* Smooth scroll behavior */
   html {
