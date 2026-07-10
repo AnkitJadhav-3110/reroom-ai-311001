@@ -169,19 +169,30 @@ All colors MUST be HSL.
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Libre Baskerville', Georgia, serif;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     @apply text-foreground;
   }
 
+  em, i, .font-italic-serif {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    color: hsl(var(--accent));
+  }
+
   .font-subheading {
-    font-family: 'Outfit', 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 500;
+    letter-spacing: -0.01em;
   }
 
   .font-body {
     font-family: 'Inter', sans-serif;
+  }
+
+  .font-display {
+    font-family: 'Playfair Display', serif;
   }
 
   /* Smooth scroll behavior */
