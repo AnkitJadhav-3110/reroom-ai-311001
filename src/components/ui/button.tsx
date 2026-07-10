@@ -9,13 +9,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-micro)] hover:shadow-[var(--shadow-elegant)] rounded-3xl",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-3xl",
-        outline: "border-2 border-border bg-transparent hover:bg-primary/5 hover:border-primary rounded-3xl",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-3xl",
-        ghost: "hover:bg-accent/10 hover:text-primary rounded-3xl",
+        default: "text-primary-foreground bg-[image:var(--gradient-primary)] shadow-[var(--shadow-glow)] hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.4),0_16px_48px_-8px_hsl(var(--primary)/0.55)] hover:-translate-y-0.5 rounded-full",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full",
+        outline: "border border-border/70 bg-background/40 backdrop-blur-md hover:bg-primary/5 hover:border-primary/60 hover:text-primary rounded-full",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full",
+        ghost: "hover:bg-primary/10 hover:text-primary rounded-full",
         link: "text-primary underline-offset-4 hover:underline",
-        luxury: "bg-[var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-gold)] hover:scale-105 rounded-3xl",
+        luxury: "text-primary-foreground bg-[image:var(--gradient-cta)] shadow-[var(--shadow-glow)] hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.5),0_20px_60px_-12px_hsl(var(--primary-variant)/0.6)] hover:-translate-y-0.5 rounded-full",
       },
       size: {
         default: "h-10 px-4 py-2",
